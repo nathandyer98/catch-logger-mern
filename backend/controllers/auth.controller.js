@@ -1,6 +1,7 @@
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
     try {
@@ -78,5 +79,37 @@ export const logout = (req, res) => {
 }
 
 export const updateProfile = async (req, res) => {
+    try{
+        const { fullName, profilePic } = req.body;
+        const userId = req.user._id
+        
+        if(!fullName && !profilePic) {
+            return res.status(400).json({ message: "No data provided" });
+        }
 
+        const updateFields = {};
+
+        if (fullName) {
+            updateFields.fullName = fullName;
+        }
+
+        if (profilePic) {
+            const uploadedResponse = await cloudinary.uploader.upload(profilePic, { folder: "user_profiles" });
+            updateFields.profilePic = uploadedResponse.secure_url;
+        }
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: updateFields },
+            { new: true, runValidators: true } 
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json(updatedUser);
+    }catch (error) {
+        console.log("Error in updateProfile controller", error);
+        res.status(500).json({ message: "Internal server error" });
+    }   
 }

@@ -9,6 +9,6 @@ router.post("/signup", signup)
 router.post("/login", login)
 router.post("/logout", logout)
 
-router.put("update-profile", authenticatedRoute, updateProfile)
+router.put("/update-profile", authenticatedRoute, updateProfile)
 
 export default router;
