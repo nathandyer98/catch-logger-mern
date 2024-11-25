@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export const CatchEnum = ["Carp", "Bream", "Tench", "Catfish", "Pike", "Perch", "Roach", "Rudd"];
+const CatchEnum = ["Carp", "Bream", "Tench", "Catfish", "Pike", "Perch", "Roach", "Rudd"];
 
 const catchSchema = new mongoose.Schema({
     userId: {

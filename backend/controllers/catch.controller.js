@@ -1,9 +1,5 @@
 import Catch from "../models/catch.model.js";
-import { CatchEnum } from "../models/catch.model.js";
 import cloudinary from "../lib/cloudinary.js";
-
-
-
 
 export const getCatches = async (req, res) => {
     try {
@@ -69,7 +65,6 @@ export const updateCatch = async (req, res) => {
         res.status(400).json({ message: "Error updating catch", error });
       }
     }
-
 
 export const deleteCatch = async (req, res) => {
     try {
