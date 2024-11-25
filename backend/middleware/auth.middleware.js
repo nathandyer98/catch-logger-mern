@@ -6,17 +6,17 @@ export const authenticatedRoute = async (req, res, next) => {
         const token = req.cookies.jwt;
 
         if(!token){
-            res.status(401).json({ message: "Unauthorized - No token" });
+            return res.status(401).json({ message: "Unauthorized - No token" });
         }
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
 
         if(!decodedToken){
-            res.status(401).json({ message: "Unauthorized - No token" });
+            return res.status(401).json({ message: "Unauthorized - No token" });
         }
         const user = await User.findById(decodedToken.userId).select("-password");
 
         if(!user){
-            res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: "User not found" });
         }
 
         req.user = user;
