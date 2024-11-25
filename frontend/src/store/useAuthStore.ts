@@ -30,11 +30,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     checkAuth: async () => {
         try {
-            const res = await axiosInstance.get("/auth/check-auth");
-            set({authenticatedUser: res.data});
+            const res = await axiosInstance.get("/auth/check");
+            set({ authenticatedUser: res.data });
         } catch (error) {
             console.log("Error in checkAuth controller", error);
-            set({authenticatedUser: null});
+            set({ authenticatedUser: null });
             
         } finally {
             set({isCheckingAuth: false});
