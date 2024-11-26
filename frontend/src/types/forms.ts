@@ -9,3 +9,8 @@ export interface LoginFormData {
     email: string;
     password: string;
 }
+
+export interface UpdateProfileData {
+    fullName?: string;
+    profilePic?: string;
+}

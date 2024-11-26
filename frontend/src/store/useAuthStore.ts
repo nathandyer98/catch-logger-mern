@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../services/api-client";
 import { User } from "../types/user";
-import { SignupFormData, LoginFormData } from "../types/forms";
+import { SignupFormData, LoginFormData, UpdateProfileData } from "../types/forms";
 import toast from "react-hot-toast";
 
 
@@ -17,6 +17,7 @@ interface AuthState {
     signup: (formData: SignupFormData) => Promise<void>;
     logout: () => Promise<void>;
     login: (formData: LoginFormData) => Promise<void>;
+    updateProfile: (data: UpdateProfileData) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -76,6 +77,20 @@ export const useAuthStore = create<AuthState>((set) => ({
         } catch (error: any) {
             console.log("Error in logout controller", error);
             toast.error(error.response.data.message);
+        }
+    },
+
+    updateProfile: async (data: UpdateProfileData) => {
+        set({ isUpdatingProfile: true });
+        try {
+            const res = await axiosInstance.put("/auth/update-profile", data);
+            set({ authenticatedUser: res.data });
+            toast.success(data.fullName ? "Name updated successfully" : "Profile picture updated successfully");
+        } catch (error: any) {
+            console.log("Error in updateProfile controller", error);
+            toast.error(error.response.data.message);
+        } finally {
+            set({ isUpdatingProfile: false });
         }
     }
 }));
