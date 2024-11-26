@@ -16,7 +16,7 @@ const LoginPage = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    login(formData);
+    login({ ...formData, email: formData.email.toLowerCase() });
   };
 
   return (
