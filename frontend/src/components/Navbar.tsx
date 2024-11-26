@@ -1,14 +1,24 @@
 import { Link } from "react-router-dom";
-import { FishSymbol, LogOut, Settings, User } from "lucide-react";
+import { FishSymbol, LogOut, User, Search } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
+import { useState } from "react";
 
 const NavBar = () => {
   const { authenticatedUser, logout } = useAuthStore();
 
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
+  const handleExpand = () => setIsExpanded(true);
+  const handleCollapse = () => {
+    if (searchText.trim() === "") setIsExpanded(false);
+  };
+
   return (
     <header className="bg-opacity-0 fixed w-full top-0 z-40">
       <div className="container mx-auto px-4 h-16">
-        <div className="flex items-center justify-between h-full">
+        <div className="w-full h-full grid grid-cols-3 items-center justify-center">
+          {/* Left Side */}
           <div className="flex items-center gap-8">
             <Link
               to="/"
@@ -21,14 +31,41 @@ const NavBar = () => {
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link
-              to={"/settings"}
-              className={`btn btn-sm gap-2 transition-colors`}
-            >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">Settings</span>
-            </Link>
+          {/* Search Bar */}
+          <div className="flex items-center justify-center">
+            {authenticatedUser && (
+              <>
+                <div
+                  className={`relative flex items-center justify-center ${
+                    !isExpanded
+                      ? "w-20 "
+                      : "w-80 text-primary bg-white rounded-full borderborder-gray-300"
+                  } transition-all duration-300  focus-within:shadow-md`}
+                >
+                  <button
+                    onMouseOver={handleExpand}
+                    className="flex items-center justify-center w-10 h-10 text-gray-500"
+                  >
+                    <Search size={20} />
+                  </button>
+                  <input
+                    type="text"
+                    className={`${
+                      isExpanded ? "w-full" : "w-0"
+                    } h-full w-full px-2 text-sm text-gray-700 bg-transparent outline-none transition-all duration-300`}
+                    placeholder="Search"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    onBlur={handleCollapse}
+                    onFocus={handleExpand}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Right Side */}
+          <div className="flex items-center gap-2 justify-end ">
             {authenticatedUser && (
               <>
                 <Link to={"/profile"} className={`btn btn-sm gap-2`}>
@@ -40,7 +77,7 @@ const NavBar = () => {
                   className="flex pl-2 gap-2 items-center"
                   onClick={logout}
                 >
-                  <LogOut className="size-6" />
+                  <LogOut className="size-6 hover:text-red-500 transition-all duration-300" />
                 </button>
               </>
             )}
