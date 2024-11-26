@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../services/api-client";
 import { User } from "../types/user";
-import { SignupFormData } from "../types/forms";
+import { SignupFormData, LoginFormData } from "../types/forms";
 import toast from "react-hot-toast";
 
 
@@ -16,6 +16,7 @@ interface AuthState {
     checkAuth: () => Promise<void>;
     signup: (formData: SignupFormData) => Promise<void>;
     logout: () => Promise<void>;
+    login: (formData: LoginFormData) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -52,6 +53,21 @@ export const useAuthStore = create<AuthState>((set) => ({
             set({ isSigningUp: false });
         }
     },
+
+    login: async (formData: LoginFormData) => {
+        set({ isLoggingIn: true });
+        try {
+            const res = await axiosInstance.post("/auth/login", formData);
+            set({ authenticatedUser: res.data });
+            toast.success("Logged in successfully");
+        } catch (error: any) {
+            console.log("Error in login controller", error);
+            toast.error(error.response.data.message);
+        } finally {
+            set({ isLoggingIn: false });
+        }        
+    },
+
     logout: async () => {
         try {
             await axiosInstance.post("/auth/logout");
