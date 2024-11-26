@@ -7,7 +7,7 @@ const OceanBackground = () => {
         <stop offset="100%" stopColor="#1E4A7B" />
       </linearGradient>
 
-      {[...Array(80)].map((_, index) => {
+      {[...Array(100)].map((_, index) => {
         //Amount of bubbles
         const size = Math.random() * 10 + 3;
         return (
@@ -19,7 +19,7 @@ const OceanBackground = () => {
               height: `${size}px`,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 60 + 40}%`,
-              animationDelay: `${Math.random() * 5}s`,
+              animationDelay: `${Math.random() * 7}s`,
             }}
           />
         );
