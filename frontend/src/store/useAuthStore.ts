@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import { axiosInstance } from "../services/api-client";
 import { User } from "../types/user";
@@ -14,6 +15,7 @@ interface AuthState {
     isCheckingAuth: boolean;
     checkAuth: () => Promise<void>;
     signup: (formData: SignupFormData) => Promise<void>;
+    logout: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -29,10 +31,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             const res = await axiosInstance.get("/auth/check");
             set({ authenticatedUser: res.data });
-        } catch (error) {
+        } catch (error: any) {
             console.log("Error in checkAuth controller", error);
             set({ authenticatedUser: null });
-            
         } finally {
             set({isCheckingAuth: false});
         }
@@ -44,11 +45,21 @@ export const useAuthStore = create<AuthState>((set) => ({
             const res = await axiosInstance.post("/auth/signup", formData);
             set({ authenticatedUser: res.data });
             toast.success("Account created successfully");
-        } catch (error) {
+        } catch (error: any) {
             console.log("Error in signup controller", error);
-            toast.error("Error creating account");
+            toast.error(error.response.data.message);
         } finally {
             set({ isSigningUp: false });
+        }
+    },
+    logout: async () => {
+        try {
+            await axiosInstance.post("/auth/logout");
+            set({ authenticatedUser: null });
+            toast.success("Logged out successfully");
+        } catch (error: any) {
+            console.log("Error in logout controller", error);
+            toast.error(error.response.data.message);
         }
     }
 }));
