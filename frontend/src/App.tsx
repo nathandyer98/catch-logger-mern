@@ -10,6 +10,7 @@ import { useAuthStore } from "./store/useAuthStore";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import OceanBackground from "./components/OceanBackground";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { authenticatedUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -52,6 +53,9 @@ const App = () => {
           }
         />
       </Routes>
+
+      <Toaster />
+
       <div className="relative max-h-screen flex items-center justify-center">
         <OceanBackground />
       </div>

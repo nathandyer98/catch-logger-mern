@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { axiosInstance } from "../services/api-client";
 import { User } from "../types/user";
 import { SignupFormData } from "../types/forms";
+import toast from "react-hot-toast";
 
 
 
@@ -38,6 +39,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     signup: async (formData: SignupFormData) => {
-        
+        set({ isSigningUp: true });
+        try {
+            const res = await axiosInstance.post("/auth/signup", formData);
+            set({ authenticatedUser: res.data });
+            toast.success("Account created successfully");
+        } catch (error) {
+            console.log("Error in signup controller", error);
+            toast.error("Error creating account");
+        } finally {
+            set({ isSigningUp: false });
+        }
     }
 }));
