@@ -1,14 +1,9 @@
 import { create } from "zustand";
 import { axiosInstance } from "../services/api-client";
+import { User } from "../types/user";
+import { SignupFormData } from "../types/forms";
 
-export interface User {
-    _id: string;
-    email: string;
-    fullName: string;
-    profilePic?: string;
-    createdAt: string;
-    updatedAt: string;
-  }
+
 
 interface AuthState {
     authenticatedUser: User | null;
@@ -17,6 +12,7 @@ interface AuthState {
     isUpdatingProfile: boolean;
     isCheckingAuth: boolean;
     checkAuth: () => Promise<void>;
+    signup: (formData: SignupFormData) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -39,5 +35,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         } finally {
             set({isCheckingAuth: false});
         }
+    },
+
+    signup: async (formData: SignupFormData) => {
+        
     }
 }));
