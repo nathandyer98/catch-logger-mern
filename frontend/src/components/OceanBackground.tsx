@@ -1,29 +1,15 @@
 const OceanBackground = () => {
   return (
-    <div className="fixed inset-0 z-[-1] bg-[#0A2342] overflow-hidden">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 100% 100%"
-        className="absolute inset-0 w-full h-full"
-      >
-        <defs>
-          <linearGradient
-            id="oceanDepthGradient"
-            x1="0%"
-            y1="0%"
-            x2="0%"
-            y2="100%"
-          >
-            <stop offset="25%" stopColor="#0A2342" />
-            <stop offset="80%" stopColor="#125D98" />
-            <stop offset="100%" stopColor="#1E4A7B" />
-          </linearGradient>
-        </defs>
-      </svg>
+    <div className="fixed inset-0 z-[-1] bg-[#0A2342] max-h-screen overflow-x-hidden overflow-y-hidden">
+      <linearGradient id="oceanDepthGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="25%" stopColor="#0A2342" />
+        <stop offset="80%" stopColor="#125D98" />
+        <stop offset="100%" stopColor="#1E4A7B" />
+      </linearGradient>
 
-      {[...Array(100)].map((_, index) => {
+      {[...Array(80)].map((_, index) => {
         //Amount of bubbles
-        const size = Math.random() * 10 + 5;
+        const size = Math.random() * 10 + 3;
         return (
           <div
             key={index}
@@ -32,7 +18,7 @@ const OceanBackground = () => {
               width: `${size}px`,
               height: `${size}px`,
               left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100 + 40}%`,
+              top: `${Math.random() * 60 + 40}%`,
               animationDelay: `${Math.random() * 5}s`,
             }}
           />

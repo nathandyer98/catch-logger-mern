@@ -9,6 +9,7 @@ import ProfilePage from "./pages/ProfilePage";
 import { useAuthStore } from "./store/useAuthStore";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
+import OceanBackground from "./components/OceanBackground";
 
 const App = () => {
   const { authenticatedUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -51,6 +52,9 @@ const App = () => {
           }
         />
       </Routes>
+      <div className="relative max-h-screen flex items-center justify-center">
+        <OceanBackground />
+      </div>
     </div>
   );
 };
