@@ -13,7 +13,7 @@ export const authenticatedRoute = async (req, res, next) => {
         if(!decodedToken){
             return res.status(401).json({ message: "Unauthorized - No token" });
         }
-        const user = await User.findById(decodedToken.userId).select("-password");
+        const user = await User.findById(decodedToken.userId).select("email fullName profilePic createdAt updatedAt");
 
         if(!user){
             return res.status(404).json({ message: "User not found" });
