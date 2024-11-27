@@ -35,7 +35,7 @@ const SettingsPage = () => {
     <div className="w-full max-w-2xl mx-auto p">
       <div className="bg-base-100 rounded-xl p-8 space-y-8">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold ">Profile</h1>
+          <h1 className="text-2xl font-semibold ">Settings</h1>
           <p className="mt-2">Your profile information</p>
         </div>
 
