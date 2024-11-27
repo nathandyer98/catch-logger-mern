@@ -1,4 +1,4 @@
-import { Bell, Home, MessageSquare, Settings, Users } from "lucide-react";
+import { Bell, Home, MessageSquare, Settings, User, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Sidebar = () => {
@@ -10,6 +10,7 @@ const Sidebar = () => {
         <NavItem label="Groups" icon={<Users size={24} />} path="/" />
         <NavItem label="Notifications" icon={<Bell size={24} />} path="/" />
         <NavItem label="Messages" icon={<MessageSquare size={24} />} path="/" />
+        <NavItem label="Profile" icon={<User size={24} />} path="/profile" />
         <NavItem
           label="Settings"
           icon={<Settings size={24} />}

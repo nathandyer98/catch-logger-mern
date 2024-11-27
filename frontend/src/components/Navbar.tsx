@@ -67,11 +67,6 @@ const NavBar = () => {
         <div className="flex items-center gap-2 justify-end ">
           {authenticatedUser && (
             <>
-              <Link to={"/profile"} className={`btn btn-sm gap-2`}>
-                <User className="size-5" />
-                <span className="hidden md:inline">Profile</span>
-              </Link>
-
               <button className="flex pl-2 gap-2 items-center" onClick={logout}>
                 <LogOut className="size-6 hover:text-red-500 transition-all duration-300" />
               </button>
