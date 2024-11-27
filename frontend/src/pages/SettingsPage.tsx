@@ -32,8 +32,8 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-4 py-44">
-      <div className="bg-base-200 rounded-xl p-6 space-y-8">
+    <div className="w-full max-w-2xl mx-auto p">
+      <div className="bg-base-100 rounded-xl p-8 space-y-8">
         <div className="text-center">
           <h1 className="text-2xl font-semibold ">Profile</h1>
           <p className="mt-2">Your profile information</p>
@@ -108,16 +108,14 @@ const SettingsPage = () => {
             >
               {isUpdatingName && (
                 <input
-                  className="px-4 py-2.5 bg-base-200 rounded-lg border text-white inline-flex w-full"
+                  className="px-4 py-2.5 bg-base-200 rounded-lg text-white inline-flex w-full"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               )}
               {!isUpdatingName && (
-                <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
-                  {name}
-                </p>
+                <p className="px-4 py-2.5 bg-base-200 rounded-lg">{name}</p>
               )}
             </div>
           </div>
@@ -126,7 +124,7 @@ const SettingsPage = () => {
               <Mail className="w-4 h-4" />
               Email Address
             </div>
-            <p className="px-4 py-2.5 bg-base-200 rounded-lg border pointer-events-none">
+            <p className="px-4 py-2.5 bg-base-200 rounded-lg  pointer-events-none">
               {authenticatedUser?.email}
             </p>
           </div>
@@ -134,7 +132,7 @@ const SettingsPage = () => {
 
         {/* account info section */}
 
-        <div className="mt-6 bg-base-300 rounded-xl p-6">
+        <div className="mt-6 bg-base-200 rounded-xl p-6">
           <h2 className="text-lg font-medium  mb-4">Account Information</h2>
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-between py-2 border-b border-zinc-700">
