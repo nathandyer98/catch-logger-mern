@@ -19,6 +19,22 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
+    bio: {
+        type: String,
+        default: "",
+    },
+    friends: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
+    catches:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Catch"
+        }
+    ]
 },
 { timestamps: true })
 
