@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import { axiosInstance } from "../services/api-client";
-import { User } from "../types/user";
+import { User } from "../types/users";
 import { SignupFormData, LoginFormData, UpdateProfileData } from "../types/forms";
 import toast from "react-hot-toast";
 
