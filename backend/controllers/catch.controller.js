@@ -3,8 +3,13 @@ import cloudinary from "../lib/cloudinary.js";
 
 export const getCatches = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.params.id || req.user._id;
         const userCatches = await Catch.find({ userId });
+
+      if (!userCatches.length) {
+        return res.status(404).json({ message: "No catches found for this user." });
+      }
+
         res.status(200).json(userCatches);
     } catch (error) {
         console.log("Error in getCatches controller", error);
@@ -50,11 +55,11 @@ export const createCatch = async (req, res) => {
 
 export const updateCatch = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { catchId } = req.params;
         const userId = req.user.id;
         const updates = req.body;
     
-        const catchToUpdate = await Catch.findOne({ _id: id, userId });
+        const catchToUpdate = await Catch.findOne({ _id: catchId, userId });
         if (!catchToUpdate) {
           return res.status(403).json({ message: "Not authorized to update this catch" });
         }
@@ -68,10 +73,10 @@ export const updateCatch = async (req, res) => {
 
 export const deleteCatch = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { catchId } = req.params;
         const userId = req.user.id;
     
-        const catchToDelete = await Catch.findOne({ _id: id, userId });
+        const catchToDelete = await Catch.findOne({ _id: catchId, userId });
         if (!catchToDelete) {
           return res.status(403).json({ message: "Not authorized to delete this catch" });
         }
