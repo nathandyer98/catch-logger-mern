@@ -1,3 +1,5 @@
+import { Catch } from "./catches";
+
 export interface User {
     _id: string;
     email: string;
@@ -5,4 +7,9 @@ export interface User {
     profilePic: string;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface UserProfile extends User {
+    friends: number;
+    catches: Catch[];
 }
