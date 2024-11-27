@@ -15,7 +15,7 @@ const NavBar = () => {
   };
 
   return (
-    <header className="h-16 w-full bg-opacity-0 top-0 z-40">
+    <header className="h-16 w-full bg-opacity-0 top-0 z-40 mb-6 mt-2">
       <div className="h-full grid grid-cols-3">
         {/* Left Side */}
         <div className="flex items-center gap-8">
