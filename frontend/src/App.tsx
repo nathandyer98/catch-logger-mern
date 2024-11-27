@@ -11,6 +11,7 @@ import { Loader } from "lucide-react";
 import OceanBackground from "./components/OceanBackground";
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./components/Sidebar";
+import ProfilePage from "./pages/ProfilePage";
 
 const App = () => {
   const { authenticatedUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -56,7 +57,7 @@ const App = () => {
             <Route
               path="/profile"
               element={
-                authenticatedUser ? <HomePage /> : <Navigate to="/login" />
+                authenticatedUser ? <ProfilePage /> : <Navigate to="/login" />
               }
             />
             <Route
