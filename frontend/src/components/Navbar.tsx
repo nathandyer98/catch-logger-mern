@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FishSymbol, LogOut, User, Search } from "lucide-react";
+import { FishSymbol, LogOut, Search } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useState } from "react";
 
