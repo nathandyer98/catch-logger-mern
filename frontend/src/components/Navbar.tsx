@@ -50,7 +50,7 @@ const NavBar = () => {
                 <input
                   type="text"
                   className={`${
-                    isExpanded ? "w-full" : "w-0"
+                    isExpanded ? "w-full" : "w-0 hidden"
                   } h-full w-full px-2 text-sm text-gray-700 bg-transparent outline-none transition-all duration-300`}
                   placeholder={isExpanded ? "Search Users" : ""}
                   value={searchText}
