@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 
 export const getUserProfile = async (req, res) => {
     try {
-        const username = req.params.username; 
+        const username = req.params.username || req.user.username; 
 
         const user = await User.findOne({ username })
             .select("fullName username profilePic catches following followers")
