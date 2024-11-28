@@ -9,6 +9,7 @@ import {
   Mail,
   FishSymbol,
   User,
+  IdCard,
 } from "lucide-react";
 import { SignupFormData } from "../types/forms";
 import toast from "react-hot-toast";
@@ -18,6 +19,7 @@ const SignUpPage = () => {
   const [formData, setFormData] = useState<SignupFormData>({
     fullName: "",
     email: "",
+    username: "",
     password: "",
     confirmPassword: "",
   });
@@ -49,7 +51,7 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen min-w-screen justify-center items-center">
+    <div className="flex min-h-screen min-w-screen justify-center items-center -m-32">
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -84,6 +86,26 @@ const SignUpPage = () => {
                 value={formData.fullName}
                 onChange={(e) =>
                   setFormData({ ...formData, fullName: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text font-medium">Username</span>
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <IdCard className="size-5 text-base-content/40" />
+              </div>
+              <input
+                type="username"
+                className={`input input-bordered w-full pl-10`}
+                placeholder="johndoe"
+                value={formData.username}
+                onChange={(e) =>
+                  setFormData({ ...formData, username: e.target.value })
                 }
               />
             </div>
