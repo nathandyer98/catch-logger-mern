@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { FishSymbol, LogOut, Search } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useState } from "react";
 
 const NavBar = () => {
   const { authenticatedUser, logout } = useAuthStore();
+  const navigate = useNavigate();
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -12,6 +13,14 @@ const NavBar = () => {
   const handleExpand = () => setIsExpanded(true);
   const handleCollapse = () => {
     if (searchText.trim() === "") setIsExpanded(false);
+  };
+
+  const handleSubmitSearch = (event: React.FormEvent) => {
+    event.preventDefault(); // Prevent the page from refreshing
+    if (searchText.trim()) {
+      navigate(`/profile/${searchText}`); // Navigate to the profile
+      setSearchText("");
+    }
   };
 
   return (
@@ -41,23 +50,27 @@ const NavBar = () => {
                     : "w-80 text-primary bg-white rounded-full borderborder-gray-300"
                 } transition-all duration-300  focus-within:shadow-md`}
               >
-                <button
+                <Link
+                  to={`/profile/${searchText}`}
                   onMouseOver={handleExpand}
+                  onClick={() => setSearchText("")}
                   className="flex items-center justify-center w-10 h-10 text-gray-500"
                 >
                   <Search size={20} />
-                </button>
-                <input
-                  type="text"
-                  className={`${
-                    isExpanded ? "w-full" : "w-0 hidden"
-                  } h-full w-full px-2 text-sm text-gray-700 bg-transparent outline-none transition-all duration-300`}
-                  placeholder={isExpanded ? "Search Users" : ""}
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  onBlur={handleCollapse}
-                  onFocus={handleExpand}
-                />
+                </Link>
+                <form className="flex-grow" onSubmit={handleSubmitSearch}>
+                  <input
+                    type="text"
+                    className={`${
+                      isExpanded ? "w-full" : "w-0 hidden"
+                    } h-full w-full px-2 text-sm text-gray-700 bg-transparent outline-none transition-all duration-300`}
+                    placeholder={isExpanded ? "Search Users" : ""}
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    onBlur={handleCollapse}
+                    onFocus={handleExpand}
+                  />
+                </form>
               </div>
             </>
           )}
