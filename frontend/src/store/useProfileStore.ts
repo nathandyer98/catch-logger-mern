@@ -8,7 +8,7 @@ interface ProfileState {
     selectedUser: UserProfile | null;
     isLoading: boolean;
 
-    fetchProfile: (userId?: string) => Promise<void>;
+    fetchProfile: (username?: string) => Promise<void>;
 
 }
 
@@ -16,12 +16,12 @@ export const useProfileStore = create<ProfileState>(( set ) => ({
     selectedUser: null,
     isLoading: false,
 
-    fetchProfile: async (userId?: string) => {
+    fetchProfile: async (username?: string) => {
 
         set({ isLoading: true });
 
         try {
-            const endpoint = userId ? `/users/${userId}` : `/users/me`;
+            const endpoint = username ? `/users/${username}` : `/users/me`;
             const res = await axiosInstance.get(endpoint);
 
             set({ selectedUser: res.data });
