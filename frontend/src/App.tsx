@@ -30,12 +30,13 @@ const App = () => {
     );
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 h-screen overflow-hidden">
       <Navbar />
-      <div className="text-base-content gap-2 grid grid-cols-6">
+      <div className="text-base-content gap-2 grid grid-cols-6 ">
         <div className="col-span-1 pb-10">
-          <Sidebar />
+          {authenticatedUser && <Sidebar />}
         </div>
+
         <div className="col-span-4 pb-10">
           <Routes>
             <Route
@@ -68,10 +69,8 @@ const App = () => {
             />
           </Routes>
         </div>
-
         <Toaster />
-
-        <div className="relative max-h-screen flex items-center justify-center">
+        <div className="relative flex items-center justify-center">
           <OceanBackground />
         </div>
       </div>
