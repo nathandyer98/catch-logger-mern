@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get("/me", authenticatedRoute, getCatches);
 
-router.get("/user/:id", authenticatedRoute,getCatches);
+router.get("/user/:username", authenticatedRoute,getCatches);
 
 router.post("/", authenticatedRoute, createCatch);
 

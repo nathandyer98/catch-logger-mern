@@ -3,8 +3,8 @@ import cloudinary from "../lib/cloudinary.js";
 
 export const getCatches = async (req, res) => {
     try {
-        const userId = req.params.id || req.user._id;
-        const userCatches = await Catch.find({ userId });
+        const username = req.params.id || req.user._id;
+        const userCatches = await Catch.find({ username });
 
       if (!userCatches.length) {
         return res.status(404).json({ message: "No catches found for this user." });

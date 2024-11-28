@@ -3,10 +3,11 @@ import User from "../models/user.model.js";
 
 export const getUserProfile = async (req, res) => {
     try {
-        const userId = req.params.id || req.user._id;
-        const user = await User.findById(userId)
-        .select("fullName username profilePic catches following followers")
-        .populate("catches");
+        const username = req.params.username; 
+
+        const user = await User.findOne({ username })
+            .select("fullName username profilePic catches following followers")
+            .populate("catches");
 
         if (!user) {
             return res.status(404).json({ message: "User not found." });

@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/me", authenticatedRoute, getUserProfile);
 
-router.get("/:id", authenticatedRoute, getUserProfile);
+router.get("/:username", authenticatedRoute, getUserProfile);
 
 // router.post("/:id/follow", authenticatedRoute, followUser);
 
