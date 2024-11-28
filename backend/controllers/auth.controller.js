@@ -5,18 +5,23 @@ import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
     try {
-        const { fullName, email, password } = req.body;
+        const { fullName, email, password, username } = req.body;
 
-        if (!fullName || !email || !password) {
+        if (!fullName.trim() || !username.trim() || !email.trim() || !password.trim() ) {
             return res.status(400).json({ message: "All fields are required" });
         }
         if(password.length < 8) {
             return res.status(400).json({ message: "Password must be at least 8 characters" });
         }
 
-        const user = await User.findOne({ email });
-        if(user) {
+        const userEmail = await User.findOne({ email });
+        if(userEmail) {
             return res.status(400).json({ message: "Email already exists" });
+        }
+
+        const user = await User.findOne({ username });
+        if(user) {
+            return res.status(400).json({ message: "Username already taken - please choose another" });
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -24,6 +29,7 @@ export const signup = async (req, res) => {
 
         const newUser = new User({
             fullName,
+            username: username.toLowerCase(),
             email: email.toLowerCase(),
             password: hashedPassword,
         });
@@ -32,7 +38,7 @@ export const signup = async (req, res) => {
             generateToken(newUser._id, res);
             await newUser.save();
 
-            res.status(201).json({_id: newUser._id, fullName: newUser.fullName, email: newUser.email, profilePic: newUser.profilePic});
+            res.status(201).json({_id: newUser._id, fullName: newUser.fullName, username: newUser.username, email: newUser.email, profilePic: newUser.profilePic});
         }else{
             return res.status(400).json({ message: "Invalid user data" });
         }
