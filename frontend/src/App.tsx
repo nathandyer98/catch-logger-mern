@@ -56,7 +56,7 @@ const App = () => {
               element={!authenticatedUser ? <LoginPage /> : <Navigate to="/" />}
             />
             <Route
-              path="/profile"
+              path="/profile/:username"
               element={
                 authenticatedUser ? <ProfilePage /> : <Navigate to="/login" />
               }
@@ -69,7 +69,7 @@ const App = () => {
             />
           </Routes>
         </div>
-        <Toaster />
+        <Toaster position="bottom-center" />
         <div className="relative flex items-center justify-center">
           <OceanBackground />
         </div>
