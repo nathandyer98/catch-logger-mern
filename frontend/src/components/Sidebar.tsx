@@ -10,7 +10,7 @@ const Sidebar = () => {
         <NavItem label="Groups" icon={<Users size={24} />} path="/" />
         <NavItem label="Notifications" icon={<Bell size={24} />} path="/" />
         <NavItem label="Messages" icon={<MessageSquare size={24} />} path="/" />
-        <NavItem label="Profile" icon={<User size={24} />} path="/profile" />
+        <NavItem label="Profile" icon={<User size={24} />} path="/profile/me" />
         <NavItem
           label="Settings"
           icon={<Settings size={24} />}
