@@ -19,7 +19,7 @@ export const getCatches = async (req, res) => {
 
 export const createCatch = async (req, res) => {
     try {
-        const { species, weight, img, dateCaught, location, comments } = req.body;
+        const { species, weight, photo, dateCaught, lake, comments } = req.body;
         const userId = req.user._id;
 
         if(!species || !weight || !dateCaught) {
@@ -35,9 +35,9 @@ export const createCatch = async (req, res) => {
             userId,
             species,
             weight,
-            img,
+            photo,
             dateCaught,
-            location,
+            lake,
             comments,
           });
 

@@ -18,7 +18,7 @@ const catchSchema = new mongoose.Schema({
         required: true,
         min: 0,
       },
-      img: {
+      photo: {
         type: String,
         default: "", 
       },
@@ -26,7 +26,7 @@ const catchSchema = new mongoose.Schema({
         type: Date,
         required: true,
       },
-      location: {
+      lake: {
         type: String,
         default: "Unknown",
       },
