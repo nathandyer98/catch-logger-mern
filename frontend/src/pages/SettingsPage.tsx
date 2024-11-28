@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Camera, Mail, User } from "lucide-react";
+import { Camera, IdCard, Mail, User } from "lucide-react";
 
 const SettingsPage = () => {
   const { authenticatedUser, isUpdatingProfile, updateProfile } =
@@ -32,7 +32,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto p">
+    <div className="w-full max-w-2xl mx-auto">
       <div className="bg-base-100 rounded-xl p-8 space-y-8">
         <div className="text-center">
           <h1 className="text-2xl font-semibold ">Settings</h1>
@@ -118,6 +118,15 @@ const SettingsPage = () => {
                 <p className="px-4 py-2.5 bg-base-200 rounded-lg">{name}</p>
               )}
             </div>
+          </div>
+          <div className="space-y-1.5">
+            <div className="text-sm text-zinc-400 flex items-center gap-2">
+              <IdCard className="w-4 h-4" />
+              Username
+            </div>
+            <p className="px-4 py-2.5 bg-base-200 rounded-lg  pointer-events-none">
+              {authenticatedUser?.username}
+            </p>
           </div>
           <div className="space-y-1.5">
             <div className="text-sm text-zinc-400 flex items-center gap-2">
