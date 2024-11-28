@@ -20,7 +20,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen min-w-screen justify-center items-center">
+    <div className="flex min-h-screen min-w-screen justify-center items-center -m-32">
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center mb-8">
