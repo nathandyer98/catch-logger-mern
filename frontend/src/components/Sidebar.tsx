@@ -1,7 +1,10 @@
 import { Bell, Home, MessageSquare, Settings, User, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
 
 const Sidebar = () => {
+  const { authenticatedUser } = useAuthStore();
+
   return (
     <div className="">
       {/* Navigation Links */}
@@ -10,7 +13,11 @@ const Sidebar = () => {
         <NavItem label="Groups" icon={<Users size={24} />} path="/" />
         <NavItem label="Notifications" icon={<Bell size={24} />} path="/" />
         <NavItem label="Messages" icon={<MessageSquare size={24} />} path="/" />
-        <NavItem label="Profile" icon={<User size={24} />} path="/profile/me" />
+        <NavItem
+          label="Profile"
+          icon={<User size={24} />}
+          path={`/profile/${authenticatedUser?.username}`}
+        />
         <NavItem
           label="Settings"
           icon={<Settings size={24} />}
