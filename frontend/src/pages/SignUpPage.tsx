@@ -176,7 +176,10 @@ const SignUpPage = () => {
                 placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={(e) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
+                  setFormData({
+                    ...formData,
+                    confirmPassword: e.target.value,
+                  })
                 }
               />
             </div>
