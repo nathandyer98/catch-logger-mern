@@ -11,6 +11,7 @@ export interface User {
 }
 
 export interface UserProfile extends User {
-    friends: number;
+    followers: number;
+    following: number;
     catches: Catch[];
 }
