@@ -1,4 +1,4 @@
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FishSymbol, LogOut, Search } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useState } from "react";
@@ -58,7 +58,12 @@ const NavBar = () => {
                 >
                   <Search size={20} />
                 </Link>
-                <form className="flex-grow" onSubmit={handleSubmitSearch}>
+                <form
+                  className={`${
+                    isExpanded ? "w-full" : "w-0 hidden"
+                  } flex-grow`}
+                  onSubmit={handleSubmitSearch}
+                >
                   <input
                     type="text"
                     className={`${
