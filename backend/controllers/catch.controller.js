@@ -19,25 +19,29 @@ export const getCatches = async (req, res) => {
 
 export const createCatch = async (req, res) => {
     try {
-        const { species, weight, photo, dateCaught, lake, comments } = req.body;
+        const { species, weight, lake, dateCaught, photo, rig, bait, distance, location, comments } = req.body;
         const userId = req.user._id;
 
         if(!species || !weight || !dateCaught) {
             return res.status(400).json({ message: "Some fields are missing" });
         }
 
-        if(img){
-            const uploadedResponse = await cloudinary.uploader.upload(img, { folder: "catches" });
-            img = uploadedResponse.secure_url;
+        if(photo){
+            const uploadedResponse = await cloudinary.uploader.upload(photo, { folder: "catches" });
+            photo = uploadedResponse.secure_url;
         }
 
         const newCatch = new Catch({
             userId,
             species,
             weight,
-            photo,
-            dateCaught,
             lake,
+            dateCaught,
+            photo,
+            rig,
+            bait,
+            distance,
+            location,
             comments,
           });
 

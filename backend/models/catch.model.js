@@ -18,18 +18,34 @@ const catchSchema = new mongoose.Schema({
         required: true,
         min: 0,
       },
-      photo: {
+      lake: {
         type: String,
-        default: "", 
+        default: "Unknown",
       },
       dateCaught: {
         type: Date,
         required: true,
       },
-      lake: {
+      photo: {
         type: String,
-        default: "Unknown",
+        default: "", 
       },
+      rig: {
+        type: String,
+        default: "", 
+      },
+      bait: {
+        type: String,
+        default: "", 
+      },
+      distance: {
+        type: Number,
+        default: 0, 
+      },
+      location: {
+        type: String,
+        default: "", 
+      },      
       comments: {
         type: String,
         maxLength: 200, 
