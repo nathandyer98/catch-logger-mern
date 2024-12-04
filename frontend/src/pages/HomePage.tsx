@@ -1,7 +1,11 @@
-import React from "react";
+import CreatePostWidget from "../components/CreatePostWidget";
 
-const HomePage: React.FC = () => {
-  return <div className=""></div>;
+const HomePage = () => {
+  return (
+    <div className="">
+      <CreatePostWidget />
+    </div>
+  );
 };
 
 export default HomePage;
