@@ -5,9 +5,7 @@ import { authenticatedRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/me", authenticatedRoute, getCatches);
-
-router.get("/user/:username", authenticatedRoute,getCatches);
+router.get("/:username", authenticatedRoute,getCatches);
 
 router.post("/", authenticatedRoute, createCatch);
 
