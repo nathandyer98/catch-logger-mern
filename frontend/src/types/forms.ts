@@ -1,3 +1,5 @@
+import { FishSpecies } from "../enum/FishSpecies";
+
 export interface SignupFormData {
     fullName: string;
     email: string;
@@ -14,4 +16,17 @@ export interface LoginFormData {
 export interface UpdateProfileData {
     fullName?: string;
     profilePic?: string;
+}
+
+export interface CatchFormData {
+    species: FishSpecies;
+    weight: number;
+    lake: string;
+    dateCaught: Date;
+    photo?: string;
+    rig?: string;
+    bait?: string;
+    distance?: number;
+    location?: string;
+    comments?: string;
 }
