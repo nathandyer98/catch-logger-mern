@@ -2,34 +2,35 @@ import { useEffect, useState } from "react";
 import { useProfileStore } from "../store/useProfileStore";
 import { Fish, MapPin, Trophy } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
 
 const ProfilePage = () => {
   const { selectedUser, isLoading, fetchProfile } = useProfileStore();
-
+  const { authenticatedUser } = useAuthStore();
   const { username } = useParams();
 
-  //CLICKING PROFILE PIC REVEALS STATS
-  const [showStats, setShowStats] = useState(false);
+  const [showStats, setShowStats] = useState(false); //CLICKING PROFILE PIC REVEALS STATS
+
+  const userToFetch =
+    username === authenticatedUser?.username ? undefined : username;
+  const isCurrentUser = authenticatedUser?.username === selectedUser?.username;
 
   useEffect(() => {
-    fetchProfile(username);
-  }, [fetchProfile, username]);
+    fetchProfile(userToFetch);
+  }, [fetchProfile, userToFetch]);
 
   if (isLoading) return <div>Loading...</div>;
 
-  console.log(selectedUser);
-  console.log(username);
-
   return (
     <>
-      <div className="p-6 flex justify-center items-center">
+      <div className="py-6 flex justify-center items-center transition-all duration-500">
         {/* Stats Slider*/}
         <div
           className={`absolute transition-transform-reverse duration-500 
         ${
           showStats
-            ? " opacity-100 brightness-100  translate-x-80 "
-            : "opacity-0 brightness-0 translate-x-30"
+            ? " opacity-100 brightness-100  translate-x-full "
+            : "opacity-0 brightness-0 translate-x-1/4"
         }`}
         >
           <h3 className="text-xl font-semibold mb-4">Personal Stats</h3>
@@ -53,25 +54,43 @@ const ProfilePage = () => {
         {/* Profile Pic */}
         <div
           className={`text-center transition-transform-reverse duration-500 ${
-            showStats ? "-translate-x-60 " : "-translate-x-0 "
+            showStats ? "-translate-x-full " : "-translate-x-0 "
           }`}
         >
           <img
             onClick={() => setShowStats(!showStats)}
             src={selectedUser?.profilePic || "/avatar.png"}
             alt="Profile"
-            className="w-32 h-32 rounded-full mx-auto mb-4"
+            className="w-32 h-32 rounded-full object-cover mx-auto mb-4"
           />
           <h2 className="text-2xl font-bold">{selectedUser?.fullName}</h2>
+
           <div className="flex justify-center space-x-4 mt-2">
-            <div>Followers: {selectedUser?.friends}</div>
-            <div>Following: 178</div>
+            <div>Followers: {selectedUser?.followers}</div>
+            <div>Following: {selectedUser?.following}</div>
           </div>
+          {!isCurrentUser && (
+            <div className="grid grid-cols-2 gap-3 justify-center mt-2 ">
+              <button
+                className="col-span-1  py-2 text-white rounded bg-blue-600 hover:bg-blue-900 transition"
+                onClick={() => console.log("Follow button clicked")} // Replace with actual logic
+              >
+                Follow
+              </button>
+
+              <button
+                className=" col-span-1  py-2 text-white rounded bg-blue-600 hover:bg-blue-900 transition"
+                onClick={() => console.log("Message button clicked")} // Replace with actual logic
+              >
+                Message
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Catch Filters ---PROVISIONAL--- */}
-      <div className="mt-6">
+      <div className="mt">
         <h3 className="text-xl font-semibold mb-4">Catch Filters</h3>
         <div className="flex space-x-4 mb-4">
           <input
