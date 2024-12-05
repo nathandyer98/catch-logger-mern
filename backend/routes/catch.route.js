@@ -1,11 +1,13 @@
 import express from "express";
 
-import { getCatches, createCatch, updateCatch, deleteCatch } from "../controllers/catch.controller.js";
+import { getCatches, createCatch, updateCatch, deleteCatch, getCatchesFeed } from "../controllers/catch.controller.js";
 import { authenticatedRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/:username", authenticatedRoute,getCatches);
+router.get("/user/:username", authenticatedRoute,getCatches);
+
+router.get("/feed", authenticatedRoute, getCatchesFeed);
 
 router.post("/", authenticatedRoute, createCatch);
 
