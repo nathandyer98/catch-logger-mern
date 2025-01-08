@@ -1,10 +1,15 @@
 export interface Catch {
-    _id: string;
     species: string;
     weight: number;
-    img: string;
+    lake: string;
     dateCaught: Date;
-    location: string;
-    comments: string;
+    photo?: string;
+    rig?: string;
+    bait?: string;
+    distance?: number;
+    location?: string;
+    comments?: string;
     createdAt: Date;
+    updatedAt: Date;
+    user: {username: string, fullName: string, profilePic?: string};
 }
