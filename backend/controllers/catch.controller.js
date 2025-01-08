@@ -17,14 +17,71 @@ export const getCatches = async (req, res) => {
     .skip((page - 1) * limit)
     .limit(limit)
     .sort({ date: -1 });
-    
-    if (!userCatches.length) {
-      return res.status(404).json({ message: "No catches found for this user." });
-    }
 
     res.status(200).json(userCatches);
   } catch (error) {
       console.log("Error in getCatches controller", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export const getCatchesFeed = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  try {
+    const currentUserId = req.user._id;
+
+    const catches = await Catch.aggregate([
+      {
+        $match: {
+          userId: { $in: [(await User.findById(currentUserId).select('following')).following, currentUserId  ]}
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      {
+        $unwind: "$user"
+      },
+      {
+        $project: {
+          _id: 0,
+          "user.username": 1,
+          "user.fullName": 1,
+          "user.profilePic": 1,
+          species: 1,
+          weight: 1,
+          lake: 1,
+          dateCaught: 1,
+          photo: 1,
+          rig: 1,
+          bait: 1,
+          distance: 1,
+          location: 1,
+          comments: 1,
+          createdAt: 1,
+          updatedAt: 1
+        }
+      },
+      {
+        $sort: { date: -1 } 
+      },
+      {
+        $skip: (page - 1) * limit, 
+      },
+      {
+        $limit: limit, 
+      },
+    ])
+
+    res.status(200).json(catches);
+ } catch (error) {
+      console.log("Error in getCatchesFeed controller", error);
       res.status(500).json({ message: "Internal server error" });
     }
 }
