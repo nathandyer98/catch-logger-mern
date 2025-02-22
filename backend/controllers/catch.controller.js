@@ -51,6 +51,7 @@ export const getCatchesFeed = async (req, res) => {
       {
         $project: {
           _id: 0,
+          "user._id": 1,
           "user.username": 1,
           "user.fullName": 1,
           "user.profilePic": 1,
@@ -69,7 +70,7 @@ export const getCatchesFeed = async (req, res) => {
         }
       },
       {
-        $sort: { date: -1 } 
+        $sort: { createdAt: -1 } 
       },
       {
         $skip: (page - 1) * limit, 
@@ -88,7 +89,7 @@ export const getCatchesFeed = async (req, res) => {
 
 export const createCatch = async (req, res) => {
   try {
-    const { species, weight, lake, dateCaught, photo, rig, bait, distance, location, comments } = req.body;
+    let { species, weight, lake, dateCaught, photo, rig, bait, distance, location, comments } = req.body;
     const userId = req.user._id;
 
     if(!species || !weight || !dateCaught) {
@@ -116,7 +117,7 @@ export const createCatch = async (req, res) => {
 
     if(newCatch) {
       await newCatch.save();
-      res.status(201).json(newCatch);
+      res.status(201).json({...newCatch._doc, user: { _id: userId, username: req.user.username, fullName: req.user.fullName, profilePic: req.user.profilePic}});
       }else{
         res.status(500).json({ message: "Invalid catch data" });
       }
@@ -137,7 +138,7 @@ export const updateCatch = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to update this catch" });
     }
     
-    const updatedCatch = await Catch.findByIdAndUpdate(id, { $set :updates}, { new: true, runValidators: true });
+    const updatedCatch = await Catch.findByIdAndUpdate(catchId, { $set :updates}, { new: true, runValidators: true });
     res.status(200).json(updatedCatch);
     } catch (error) {
       res.status(400).json({ message: "Error updating catch", error });
