@@ -35,7 +35,9 @@ const NavBar = () => {
             <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
               <FishSymbol className="w-5 h-5 text-primary" />
             </div>
-            <h1 className="text-lg font-bold hidden md:block">Catch Logger</h1>
+            <h1 className="text-lg text-white/90 font-bold hidden md:block">
+              Catch Logger
+            </h1>
           </Link>
         </div>
 

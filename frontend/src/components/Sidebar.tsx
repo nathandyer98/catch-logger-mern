@@ -39,7 +39,7 @@ const NavItem: React.FC<NavItemProps> = ({ label, icon, path }) => {
   return (
     <Link
       to={path}
-      className="flex items-center gap-3 px-4 py-3 transition-all duration-400 hover:bg-base-300 hover:rounded-xl"
+      className="flex items-center gap-3 px-4 py-3 text-white/90 transition-all duration-400 hover:bg-base-300 hover:rounded-xl"
     >
       <div className="text-primary">{icon}</div>
       {/* Hide label on small screens */}

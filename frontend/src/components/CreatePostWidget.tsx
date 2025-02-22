@@ -44,6 +44,7 @@ const CreatePostWidget = () => {
     reader.onload = async () => {
       const base64Image = reader.result as string;
       setSelectedImg(base64Image);
+      setFormData({ ...formData, photo: base64Image });
     };
   };
 
@@ -61,9 +62,9 @@ const CreatePostWidget = () => {
   };
 
   return (
-    <div className="relative max-w-full mx-auto bg-primary/5 rounded-2xl shadow-sm mb-6">
+    <div className="relative max-w-full mx-auto bg-primary/15 rounded-2xl shadow-sm mb-6">
       {isAddingCatch && (
-        <div className="absolute rounded-2xl top-0 left-0 w-full h-full bg-black/60 flex items-center justify-center z-10">
+        <div className="absolute rounded-2xl top-0 left-0 w-full h-full flex items-center justify-center z-10">
           <Loader className="animate-spin text-primary" />
         </div>
       )}
@@ -77,6 +78,10 @@ const CreatePostWidget = () => {
             />
             <div className="flex-1 min-h-[20px] p-2">
               <textarea
+                value={formData.comments}
+                onChange={(e) =>
+                  setFormData({ ...formData, comments: e.target.value })
+                }
                 placeholder="Share your latest catch..."
                 className="textarea textarea-bordered w-full resize-none bg-transparent border-0"
               />
@@ -100,9 +105,9 @@ const CreatePostWidget = () => {
                 </button>
               </div>
             )}
-            <div className="grid gap-3 grid-cols-2 sm:grid-cols-4 ">
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-4 text-white/90">
               <select
-                className=" select select-sm border-0 bg-transparent w-full text-center"
+                className=" select select-sm border-0 bg-transparent w-full text-center text-gray-400"
                 value={formData.species}
                 onChange={(e) =>
                   setFormData({
