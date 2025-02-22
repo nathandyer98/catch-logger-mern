@@ -26,8 +26,11 @@ export const useCatchStore = create<CatchState>((set) => ({
     addCatch: async (formData: CatchFormData) => {
         set({ isAddingCatch: true });
         try {
-            await axiosInstance.post("/catches", formData);
+            const res = await axiosInstance.post("/catches", formData);
             toast.success("Catch added successfully");
+            const newCatch = res.data;
+             set((state) => ({
+                 feedCatches: [newCatch, ...(state.feedCatches || [])], }));
         } catch (error: any) {
             console.log("Error in add catch controller", error);
             toast.error(error.response.data.message);
