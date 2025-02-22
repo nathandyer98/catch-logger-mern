@@ -5,7 +5,7 @@ import { Camera, IdCard, Mail, User } from "lucide-react";
 const SettingsPage = () => {
   const { authenticatedUser, isUpdatingProfile, updateProfile } =
     useAuthStore();
-  const [selectedImg, setSelectedselectedImg] = useState<string>("");
+  const [selectedImg, setSelectedselectedImg] = useState<string | null>(null);
 
   const [isUpdatingName, setIsUpdatingName] = useState(false);
   const [name, setName] = useState(authenticatedUser?.fullName);
