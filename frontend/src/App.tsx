@@ -20,9 +20,7 @@ const App = () => {
     checkAuth();
   }, [checkAuth]);
 
-  console.log(authenticatedUser);
-
-  if (isCheckingAuth || !authenticatedUser)
+  if (isCheckingAuth && !authenticatedUser)
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader className="size-10 animate-spin" />
@@ -32,10 +30,10 @@ const App = () => {
   return (
     <div className="container mx-auto px-4 h-screen overflow-hidden">
       <Navbar />
-      <div className="grid grid-cols-5 gap-10 h-full ">
+      <div className="grid grid-cols-5 gap-10 h-full mb-52">
         <div className="col-span-1">{authenticatedUser && <Sidebar />}</div>
 
-        <div className="col-span-3 pb-10">
+        <div className="col-span-3 pb-24 overflow-y-scroll">
           <Routes>
             <Route
               path="/"
