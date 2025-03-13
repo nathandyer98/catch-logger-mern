@@ -31,21 +31,24 @@ const userSchema = new mongoose.Schema({
     following: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
+            ref: "User",
+            default: [],
         }
     ],
     followers: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
+            ref: "User",
+            default: [],
         }
     ],
-    catches:[
+    likedCatches: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Catch"
+            ref: "Catch",
+            default: [],
         }
-    ]
+    ],
 },
 { timestamps: true })
 
