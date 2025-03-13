@@ -22,10 +22,12 @@ const catchSchema = new mongoose.Schema({
       lake: {
         type: String,
         default: "Unknown",
+        required: true,
       },
       dateCaught: {
         type: Date,
         required: true,
+        default: Date.now,
       },
       photo: {
         type: String,
@@ -37,7 +39,7 @@ const catchSchema = new mongoose.Schema({
       },
       bait: {
         type: String,
-        default: "", 
+        default: "",
       },
       distance: {
         type: Number,
@@ -47,10 +49,35 @@ const catchSchema = new mongoose.Schema({
         type: String,
         default: "", 
       },      
-      comments: {
+      text: {
         type: String,
         maxLength: 200, 
+        default: "",
       },
+      likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }],
+      comments: [{
+          text: {
+              type: String,
+              required: true
+          },
+          user: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: 'User',
+              required: true
+          },
+          createdAt: {
+              type: Date,
+              default: Date.now
+          },
+          updatedAt: {
+              type: Date,
+              default: Date.now
+          }
+      }, ],
+
     },
     { timestamps: true }
   );

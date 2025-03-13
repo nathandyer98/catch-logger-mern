@@ -1,38 +1,26 @@
 import express from "express";
 
-import { getCatches, createCatch, updateCatch, deleteCatch, getCatchesFeed } from "../controllers/catch.controller.js";
+import { getAllCatches, getUserCatches, createCatch, updateCatch, deleteCatch, getCatchesFeed, createComment, deleteComment, updateComment, likeUnlikeCatch } from "../controllers/catch.controller.js";
 import { authenticatedRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/user/:username", authenticatedRoute,getCatches);
-
 router.get("/feed", authenticatedRoute, getCatchesFeed);
 
+router.get("/user/:username", authenticatedRoute,getUserCatches);
+
+router.get("/", authenticatedRoute, getAllCatches);
 router.post("/", authenticatedRoute, createCatch);
-
 router.put("/:catchId", authenticatedRoute, updateCatch);
-
 router.delete("/:catchId", authenticatedRoute, deleteCatch);
 
+router.post("/:catchId/comments", authenticatedRoute, createComment);
+router.delete("/:catchId/comments/:commentId", authenticatedRoute, deleteComment);
+router.put("/:catchId/comments/:commentId", authenticatedRoute, updateComment);
 
-// -----------------TO ADD----------------
-// GET /catches/feed
-// Fetch a feed of catches from followed users (paginated).
-//-----------------POTENTIAL-----------------
-// Comments and Likes (Optional, for engagement)
+router.post("/:catchId/like", authenticatedRoute, likeUnlikeCatch);
 
-// POST /catches/:catchId/comments
-// Add a comment to a specific catch.
 
-// GET /catches/:catchId/comments
-// Fetch comments for a specific catch.
-
-// POST /catches/:catchId/like
-// Like a specific catch.
-
-// DELETE /catches/:catchId/like
-// Unlike a specific catch.
 
 
 export default router;
