@@ -6,6 +6,8 @@ import cors from "cors";
 import authRoute from "../routes/auth.route.js";
 import catchRoute from "../routes/catch.route.js"
 import userRoute from "../routes/user.route.js"
+import notificationRoute from "../routes/notification.route.js"
+
 import { connectDB } from "../lib/db.js";
 
 dotenv.config();
@@ -23,7 +25,7 @@ app.use(cors({
 app.use("/api/auth", authRoute);
 app.use("/api/catches", catchRoute);
 app.use("/api/users", userRoute);
-
+app.use("/api/notifications", notificationRoute);
 
 app.listen(PORT, () => {
     console.log("Server is running on port:",PORT);
