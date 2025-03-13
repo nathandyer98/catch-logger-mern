@@ -4,9 +4,8 @@ import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
+    const { fullName, email, password, username } = req.body;
     try {
-        const { fullName, email, password, username } = req.body;
-
         if (!fullName.trim() || !username.trim() || !email.trim() || !password.trim() ) {
             return res.status(400).json({ message: "All fields are required" });
         }
@@ -50,9 +49,8 @@ export const signup = async (req, res) => {
 }
 
 export const login = async (req, res) => {
+    const { email, password } = req.body;
     try {
-        const { email, password } = req.body;
-        
         const user = await User.findOne({ email });
 
         if(!user) {
@@ -85,13 +83,14 @@ export const logout = (req, res) => {
 }
 
 export const updateProfile = async (req, res) => {
+    const { fullName, profilePic } = req.body;
+    const userId = req.user._id
     try{
-        const { fullName, profilePic } = req.body;
-        const userId = req.user._id
-        
         if(!fullName && !profilePic) {
             return res.status(400).json({ message: "No data provided" });
         }
+        const user = awaitUser.findById(userId);  
+        if(!user)return res.status(404).json({ message: "User not found" });
 
         const updateFields = {};
 
@@ -100,6 +99,9 @@ export const updateProfile = async (req, res) => {
         }
 
         if (profilePic) {
+            if(user.profilePic){
+                await cloudinary.uploader.destroy(user.profilePic.split('/').pop().split('.')[0]);  
+            }
             const uploadedResponse = await cloudinary.uploader.upload(profilePic, { folder: "user_profiles" });
             updateFields.profilePic = uploadedResponse.secure_url;
         }
