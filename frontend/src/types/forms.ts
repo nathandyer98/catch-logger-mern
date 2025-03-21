@@ -28,5 +28,5 @@ export interface CatchFormData {
     bait?: string;
     distance?: number;
     location?: string;
-    comments?: string;
+    text?: string;
 }

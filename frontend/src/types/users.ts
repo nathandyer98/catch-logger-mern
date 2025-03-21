@@ -1,5 +1,3 @@
-import { Catch } from "./catches";
-
 export interface User {
     _id: string;
     username: string;
@@ -11,7 +9,6 @@ export interface User {
 }
 
 export interface UserProfile extends User {
-    followers: number;
-    following: number;
-    catches: Catch[];
+    followers: [];
+    following: [];
 }
