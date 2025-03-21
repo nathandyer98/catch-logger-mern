@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getUsersProfile, getSuggestedUsers ,followUser, unfollowUser } from "../controllers/user.controller.js";
+import { getUsersProfile, getSuggestedUsers ,followUnfollowUser } from "../controllers/user.controller.js";
 import { authenticatedRoute } from "../middleware/auth.middleware.js";
 
 
@@ -12,8 +12,8 @@ router.get("/:username", authenticatedRoute, getUsersProfile);
 
 router.get("/suggested", authenticatedRoute, getSuggestedUsers);
 
-router.post("/:id/follow", authenticatedRoute, followUser);
+router.post("/:id/followUnfollow", authenticatedRoute, followUnfollowUser);
 
-router.delete("/:id/unfollow", authenticatedRoute, unfollowUser);
+// router.delete("/:id/unfollow", authenticatedRoute, unfollowUser);
 
 export default router;

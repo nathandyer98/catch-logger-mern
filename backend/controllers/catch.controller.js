@@ -12,10 +12,12 @@ export const getAllCatches = async (req, res) => {
         .limit(limit)
         .sort({ dateCaught: -1 })
         .populate({
-            path: "userId",
+            path: "user" ,
             select: "username fullName profilePic"
         })
-        .populate({path: "comments",populate: {path: "userId",select: "username fullName profilePic"}});
+        .populate({path: "comments",
+          populate: {path: "user",
+          select: "username fullName profilePic"}});
             
     res.status(200).json(catches);
   } catch (error) {
@@ -28,19 +30,19 @@ export const getUserCatches = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const { username } = req.params
-  const user = await User.findOne({ username });
   try {
+    const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
-    const userCatches = await Catch.find({ userId: user._id })
+    const userCatches = await Catch.find({ user: user._id })
     .skip((page - 1) * limit)
     .limit(limit)
     .sort({ date: -1 }).populate({
-      path: "userId",
+      path: "user",
       select: "username fullName profilePic"
   })
-  .populate({path: "comments",populate: {path: "userId",select: "username fullName profilePic"}});
+  .populate({path: "comments",populate: {path: "user",select: "username fullName profilePic"}});
 
     res.status(200).json(userCatches);
   } catch (error) {
@@ -64,8 +66,8 @@ export const getCatchesFeed = async (req, res) => {
     const followingUsers = user.following;
 
     const catches = await Catch.find({ user: { $in: [...followingUsers, currentUserId] } })
-    .populate('user', '-password')
-    .populate('comments.user', '-password')
+    .populate('user', 'username fullName profilePic')
+    .populate('comments.user', 'username fullName profilePic')
     .sort({ createdAt: -1 })
     .skip((page - 1) * limit)
     .limit(limit);
@@ -93,7 +95,7 @@ export const createCatch = async (req, res) => {
     }
 
     const newCatch = new Catch({
-      userId,
+      user : userId,
       species,
       weight,
       lake,
@@ -160,12 +162,16 @@ export const deleteCatch = async (req, res) => {
       return res.status(404).json({ message: "Catch not found" });
     }
     
-    const catchToDelete = await Catch.findOne({ _id: catchId, userId });
+    const catchToDelete = await Catch.findOne({  _id: catchId, user: userId });
     if (!catchToDelete) {
       return res.status(403).json({ message: "Not authorized to delete this catch" });
     }
+
+    if(catchToDelete.photo){
+      await cloudinary.uploader.destroy(catchToDelete.photo.split('/').pop().split('.')[0]);
+    }
     
-    await Catch.deleteOne(catchToDelete);
+    await Catch.deleteOne({  _id: catchId, user: userId });
     res.status(200).json({ message: "Catch deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Error deleting catch", error });
@@ -179,7 +185,8 @@ export const createComment = async (req, res) => {
   try {
     if (!text) return res.status(400).json({ message: "Comment text is required" });
     
-    const catchPost = await Catch.findByIdAndUpdate(catchId, { $push: { comments: { user: userId, text } } }, { new: true });
+    const catchPost = await Catch.findByIdAndUpdate(catchId, { $push: { comments: { user: userId, text } } }, { new: true }).populate('comments.user', 'username fullName profilePic');
+
     if (!catchPost) return res.status(404).json({ message: "Catch not found" });
     
     res.status(201).json(catchPost);
@@ -248,19 +255,19 @@ export const likeUnlikeCatch = async (req, res) => {
     const isLiked = catchPost.likes.includes(userId);
 
     if(isLiked) {
-      await Catch.findByIdAndUpdate(catchId, { $pull: { likes: userId } }, { new: true });
+      const catchPost = await Catch.findByIdAndUpdate(catchId, { $pull: { likes: userId } }, { new: true });
       await User.findByIdAndUpdate(userId, { $pull: { likedCatches: catchId } }, { new: true });
 
       await Notification.create({
         from: userId,
-        to: catchPost.userId,
+        to: catchPost.user,
         type: 'like',
       });
-      res.status(200).json({ message: "Like removed successfully" });
+      res.status(200).json({ data:catchPost.likes, message: "Catch Unliked" });
     } else {
-      await Catch.findByIdAndUpdate(catchId, { $push: { likes: userId } }, { new: true });
+      const catchPost = await Catch.findByIdAndUpdate(catchId, { $push: { likes: userId } }, { new: true });
       await User.findByIdAndUpdate(userId, { $push: { likedCatches: catchId } }, { new: true });
-      res.status(200).json({ message: "Like added successfully" });
+      res.status(200).json({ data:catchPost.likes, message: "Catch Liked" });
     }
   } catch (error) { 
     console.log("Error in likeUnlikeCatch controller", error);

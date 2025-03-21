@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const CatchEnum = ["Carp", "Bream", "Tench", "Catfish", "Pike", "Perch", "Roach", "Rudd"];
 
 const catchSchema = new mongoose.Schema({
-    userId: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User", 
         required: true,
