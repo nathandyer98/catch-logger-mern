@@ -21,6 +21,7 @@ const defaultFormData: CatchFormData = {
 
 const CreatePostWidget = () => {
   const [formData, setFormData] = useState<CatchFormData>(defaultFormData);
+  const [isFocused, setIsFocused] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
 
@@ -68,27 +69,30 @@ const CreatePostWidget = () => {
           <Loader className="animate-spin text-primary" />
         </div>
       )}
-      <form className="flex-1" onSubmit={handleSubmit}>
-        <div className="p-4">
-          <div className="flex gap-5 align-middle">
-            <img
-              className="w-14 h-14 rounded-full object-cover"
-              src={authenticatedUser?.profilePic || "/avatar.png"}
-              alt="Profile Picture"
-            />
-            <div className="flex-1 min-h-[20px] p-2">
-              <textarea
-                value={formData.text}
-                onChange={(e) =>
-                  setFormData({ ...formData, text: e.target.value })
-                }
-                placeholder="Share your latest catch..."
-                className="textarea textarea-bordered w-full resize-none bg-transparent border-0"
-              />
-            </div>
-          </div>
 
-          <div className="flex-1 space-y-3">
+      <form className="flex-1 " onSubmit={handleSubmit}>
+        <div className="flex gap-5 p-4 align-middle">
+          <img
+            className="w-14 h-14 rounded-full object-cover"
+            src={authenticatedUser?.profilePic || "/avatar.png"}
+            alt="Profile Picture"
+          />
+          <div className="flex-1 min-h-[20px]">
+            <textarea
+              value={formData.text}
+              onChange={(e) =>
+                setFormData({ ...formData, text: e.target.value })
+              }
+              placeholder="Share your latest catch..."
+              onFocus={() => setIsFocused(true)}
+              className={`textarea textarea-bordered w-full resize-none bg-transparent border-0 hover:border-1 transition-all duration-300  ${
+                isFocused ? "h-24" : "h-1"
+              }`}
+            />
+          </div>
+        </div>
+        {isFocused && (
+          <div className={`flex-1 space-y-3`}>
             {/* Image Preview Here */}
             {selectedImg && (
               <div className="relative rounded-lg overflow-hidden">
@@ -133,7 +137,10 @@ const CreatePostWidget = () => {
                   className="input bg-transparent border-0 h-8 w-full max-w-xs text-center"
                   value={formData.weight}
                   onChange={(e) =>
-                    setFormData({ ...formData, weight: Number(e.target.value) })
+                    setFormData({
+                      ...formData,
+                      weight: Number(e.target.value),
+                    })
                   }
                 />
                 <span>lbs</span>
@@ -198,36 +205,44 @@ const CreatePostWidget = () => {
               </div>
             )}
           </div>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-3 border-t">
-          <div className="flex-1 flex items-center gap-5">
-            <label
-              htmlFor="avatar-upload"
-              className="flex justify-start items-center ml-4 h-9 w-9 cursor-pointer"
+        )}
+        {isFocused && (
+          <div className="flex items-center gap-2 px-4 py-3 border-t">
+            <div className="flex-1 flex items-center gap-5">
+              <label
+                htmlFor="avatar-upload"
+                className="flex justify-start items-center ml-4 h-9 w-9 cursor-pointer"
+              >
+                <Camera className="w-5 h-5" />
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
+              </label>
+              <label
+                htmlFor="expand"
+                className="flex justify-start items-center cursor-pointer"
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
+                <ChevronDown
+                  className={`h-5 w-5 transition-transform duration-600" ${
+                    isExpanded && " -rotate-180"
+                  }`}
+                />
+              </label>
+            </div>
+            <button
+              className="btn btn-sm rounded-md btn-outline"
+              onClick={() => setIsFocused(false)}
             >
-              <Camera className="w-5 h-5" />
-              <input
-                type="file"
-                id="avatar-upload"
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageUpload}
-              />
-            </label>
-            <label
-              htmlFor="expand"
-              className="flex justify-start items-center cursor-pointer"
-              onClick={() => setIsExpanded(!isExpanded)}
-            >
-              <ChevronDown
-                className={`h-5 w-5 transition-transform duration-600" ${
-                  isExpanded && " -rotate-180"
-                }`}
-              />
-            </label>
+              Cancel
+            </button>
+            <button className="btn btn-sm rounded-md btn-outline">Post</button>
           </div>
-          <button className="btn btn-sm rounded-md btn-outline">Post</button>
-        </div>
+        )}
       </form>
     </div>
   );
