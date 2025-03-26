@@ -13,6 +13,7 @@ import { Toaster } from "react-hot-toast";
 import Sidebar from "./components/Sidebar";
 import ProfilePage from "./pages/ProfilePage";
 import NotificationPage from "./pages/NotificationPage";
+import SuggestedUsers from "./components/SuggestedUsers";
 
 const App = () => {
   const { authenticatedUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -75,6 +76,9 @@ const App = () => {
               }
             />
           </Routes>
+        </div>
+        <div className="col-span-1">
+          {authenticatedUser && <SuggestedUsers />}
         </div>
         <Toaster position="bottom-center" />
         <div className="relative flex items-center justify-center">

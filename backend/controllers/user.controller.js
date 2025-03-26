@@ -1,28 +1,5 @@
 import User from "../models/user.model.js";
-
-// export const getCurrentProfile = async (req, res) => {
-//     try {
-//             const user = await User.findOne(req.user._id)
-//             .select("fullName username profilePic catches following followers") 
-//             .populate("catches");
-
-//         if (!user) {
-//             return res.status(404).json({ message: "User not found." });
-//         }
-
-//         res.status(200).json({ 
-//             _id: user._id, 
-//             username: user.username,
-//             fullName: user.fullName, 
-//             profilePic: user.profilePic, 
-//             following: user.following.length, 
-//             followers: user.followers.length, 
-//             catches: user.catches });
-//     } catch (error) {
-//         console.log("Error in getUserProfile controller", error);
-//         res.status(500).json({ message: "Internal server error" });
-//     }
-// }
+import Notification from "../models/notification.model.js";
 
 export const getUsersProfile = async (req, res) => { // Add META data to check if you are following the user
     const { username } = req.params
@@ -79,49 +56,19 @@ export const followUnfollowUser = async (req, res) => {
     }
 }   
 
-// export const unfollowUser = async (req, res) => {
-//     const { id } = req.params;
-//     const userId = req.user._id;
-//     try {
-//         const userToUnfollow = await User.findById(id);
-//         const currentUser = await User.findById(userId);    
-
-//         if (!userToUnfollow) {
-//             return res.status(404).json({ message: "User not found." });
-//         }
-
-//         if (!currentUser.following.includes(userToUnfollow._id)) {
-//             return res.status(400).json({ message: "You are not following this user." });
-//         }
-
-//         await User.findByIdAndUpdate(userId, { $pull: { following: userToUnfollow._id } });
-//         await User.findByIdAndUpdate(userToUnfollow._id, { $pull: { followers: userId } });
-        
-//         res.status(200).json({ message: "You are no longer following this user." });
-//     } catch (error) {
-//         console.log("Error in unfollowUser controller", error);
-//         res.status(500).json({ message: "Internal server error" });
-//     }
-// }
-
 export const getSuggestedUsers = async (req, res) => {
     const userId = req.user._id;
     try {
         const usersFollowedByMe = await User.findById(userId).select('following');
 
-        const users = await User.aggregate([
-            { $match: { _id: { $ne: userId } } },
-            { $sample: { size: 10 } }
-        ])
+        const users = await User.find({ _id: { $ne: userId } })
+            .limit(10)
+            .select("_id fullName username profilePic");
 
         const filteredUsers = users.filter(user => !usersFollowedByMe.following.includes(user._id));
         const suggestedUsers = filteredUsers.slice(0, 4);
 
-        suggestedUsers.forEach(user => user.password = null);
-
-
         res.status(200).json({ suggestedUsers })
-
     } catch (error) {
         console.log("Error in getSuggestedUsers: ", error);
         res.status(500).json({ message: 'Server Error' });
