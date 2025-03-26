@@ -189,6 +189,13 @@ export const createComment = async (req, res) => {
 
     if (!catchPost) return res.status(404).json({ message: "Catch not found" });
     
+    if(catchPost.user._id.toString() !== userId.toString()){
+    await Notification.create({
+      from: userId,
+      to: catchPost.user,
+      type: 'comment',
+    });}
+
     res.status(201).json(catchPost);
   } catch (error) {
     console.log("Error in createComment controller", error);
@@ -259,15 +266,18 @@ export const likeUnlikeCatch = async (req, res) => {
       const catchPost = await Catch.findByIdAndUpdate(catchId, { $pull: { likes: userId } }, { new: true });
       await User.findByIdAndUpdate(userId, { $pull: { likedCatches: catchId } }, { new: true });
 
-      await Notification.create({
-        from: userId,
-        to: catchPost.user,
-        type: 'like',
-      });
       res.status(200).json({ data:catchPost.likes, message: "Catch Unliked" });
     } else {
       const catchPost = await Catch.findByIdAndUpdate(catchId, { $push: { likes: userId } }, { new: true });
       await User.findByIdAndUpdate(userId, { $push: { likedCatches: catchId } }, { new: true });
+
+      if(catchPost.user._id.toString() !== userId.toString()){
+        await Notification.create({
+          from: userId,
+          to: catchPost.user,
+          type: 'like',
+      })};
+
       res.status(200).json({ data:catchPost.likes, message: "Catch Liked" });
     }
   } catch (error) { 

@@ -65,7 +65,13 @@ export const followUnfollowUser = async (req, res) => {
             const user =  await User.findByIdAndUpdate(id, { $push: { followers: userId } },{ new: true }).select("-password");
             await User.findByIdAndUpdate(userId, { $push: { following: id } }, { new: true });
 
-            res.status(200).json({ data: user ,message: "You are now following this user." });
+            await Notification.create({
+                    from: userId,
+                    to: user,
+                    type: 'follow',
+                  });
+
+            res.status(200).json({ data: user ,message: "You are now following this user." });  
         }
     } catch (error) {
         console.log("Error in followUser controller", error);

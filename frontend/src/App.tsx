@@ -12,6 +12,7 @@ import OceanBackground from "./components/OceanBackground";
 import { Toaster } from "react-hot-toast";
 import Sidebar from "./components/Sidebar";
 import ProfilePage from "./pages/ProfilePage";
+import NotificationPage from "./pages/NotificationPage";
 
 const App = () => {
   const { authenticatedUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -55,6 +56,16 @@ const App = () => {
               path="/profile/:username"
               element={
                 authenticatedUser ? <ProfilePage /> : <Navigate to="/login" />
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                authenticatedUser ? (
+                  <NotificationPage />
+                ) : (
+                  <Navigate to="/login" />
+                )
               }
             />
             <Route

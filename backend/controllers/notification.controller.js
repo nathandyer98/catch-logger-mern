@@ -3,7 +3,7 @@ import Notification from "../models/notification.model.js";
 export const getNotifications = async (req, res) => {
     const userId = req.user._id;
     try {
-        const notifications = await Notification.find({ to: userId }).populate('from', 'username profileImage').sort({ createdAt: -1 });
+        const notifications = await Notification.find({ to: userId }).populate('from', 'username fullName profilePic').sort({ createdAt: -1 });
 
         await Notification.updateMany({ to: userId }, { read: true });
 
@@ -11,9 +11,20 @@ export const getNotifications = async (req, res) => {
     } catch (error) {
         console.log(" Error in getNotifications ", error.message);
         res.status(500).json({ message: "Server Error" });
-
     }
 }
+
+export const getNotificationsCount = async (req, res) => {
+    const userId = req.user._id;
+    try {
+        const count = await Notification.countDocuments({ to: userId, read: false });
+        res.status(200).json({ count }); 
+    } catch (error) {
+        console.log(" Error in getNotificationsCount ", error.message);
+        res.status(500).json({ message: "Server Error" });
+    }
+}
+
 
 export const deleteNotifications = async (req, res) => {
     const userId = req.user._id;
