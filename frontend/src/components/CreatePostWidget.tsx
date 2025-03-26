@@ -16,7 +16,7 @@ const defaultFormData: CatchFormData = {
   bait: "",
   distance: 0,
   location: "",
-  comments: "",
+  text: "",
 };
 
 const CreatePostWidget = () => {
@@ -78,9 +78,9 @@ const CreatePostWidget = () => {
             />
             <div className="flex-1 min-h-[20px] p-2">
               <textarea
-                value={formData.comments}
+                value={formData.text}
                 onChange={(e) =>
-                  setFormData({ ...formData, comments: e.target.value })
+                  setFormData({ ...formData, text: e.target.value })
                 }
                 placeholder="Share your latest catch..."
                 className="textarea textarea-bordered w-full resize-none bg-transparent border-0"

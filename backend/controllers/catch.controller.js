@@ -236,12 +236,13 @@ export const updateComment = async (req, res) => {
       { _id: catchId, "comments._id": commentId },
       { $set: { "comments.$.text": text, "comments.$.updatedAt": Date.now() } },
       { new: true }
-    );
+    ).populate('comments.user', 'username fullName profilePic');;
     
     res.status(200).json(updatedCatch);
     
   } catch (error) {
-    
+    console.log("Error in updateComment controller", error);
+    res.status(500).json({ message: "Internal server error" });    
   }
 }
 

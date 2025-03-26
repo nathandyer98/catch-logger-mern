@@ -1,4 +1,4 @@
-interface Comment {
+export interface Comment {
     _id: string;
     user: {_id: string, username: string, fullName: string, profilePic?: string};
     text: string;

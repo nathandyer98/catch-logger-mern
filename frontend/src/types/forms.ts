@@ -30,3 +30,7 @@ export interface CatchFormData {
     location?: string;
     text?: string;
 }
+
+export interface CommentFormData {
+    text: string;
+}
