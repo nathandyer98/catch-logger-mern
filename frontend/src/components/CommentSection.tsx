@@ -49,6 +49,11 @@ const CommentSection = ({ catchId, commentArray }: Props) => {
                 <input
                   value={editedText}
                   onChange={(e) => setEditedText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleEditSubmit();
+                    }
+                  }}
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
                 <div className="flex justify-end mt-2 space-x-2">
