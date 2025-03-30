@@ -20,3 +20,10 @@ export interface SuggestedUser {
     profilePic: string;
     isFollowing: boolean;
 }
+
+export interface Participant {
+    _id: string;
+    username: string;
+    fullName: string;
+    profilePic: string;
+}

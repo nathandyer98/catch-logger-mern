@@ -27,7 +27,11 @@ const Sidebar = () => {
           path="/notifications"
           number={notificationsCount ?? 0}
         />
-        <NavItem label="Messages" icon={<MessageSquare size={24} />} path="/" />
+        <NavItem
+          label="Messages"
+          icon={<MessageSquare size={24} />}
+          path="/messages"
+        />
         <NavItem
           label="Profile"
           icon={<User size={24} />}

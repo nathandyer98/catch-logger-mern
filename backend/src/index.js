@@ -7,6 +7,7 @@ import authRoute from "../routes/auth.route.js";
 import catchRoute from "../routes/catch.route.js"
 import userRoute from "../routes/user.route.js"
 import notificationRoute from "../routes/notification.route.js"
+import converstaionRoute from "../routes/conversation.route.js"
 
 import { connectDB } from "../lib/db.js";
 
@@ -26,6 +27,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/catches", catchRoute);
 app.use("/api/users", userRoute);
 app.use("/api/notifications", notificationRoute);
+app.use("/api/conversations", converstaionRoute)
 
 app.listen(PORT, () => {
     console.log("Server is running on port:",PORT);
