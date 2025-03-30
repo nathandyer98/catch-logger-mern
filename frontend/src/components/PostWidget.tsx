@@ -38,7 +38,7 @@ const PostWidget = ({ catchData }: Props) => {
 
   return (
     <div className="max-w-full mx-auto bg-transparent/25 shadow-md rounded-xl my-4 p-4">
-      {/**Header - Profile Pic, Name, Username, Posted at */}
+      {/* Header - Profile Pic, Name, Username, Posted at */}
       <div className="flex justify-between">
         <div className="flex gap-5 align-middle">
           <img

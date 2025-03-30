@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useProfileStore } from "../store/useProfileStore";
 import { useEffect } from "react";
-import { CheckIcon, TicketCheck } from "lucide-react";
 
 const SuggestedUsers = () => {
   const {
@@ -28,7 +27,7 @@ const SuggestedUsers = () => {
       <div className=" rounded-lg top-2 ">
         <p className="font-bold mb-4">Who to follow</p>
         <div className="flex flex-col gap-2">
-          {/* item */}
+          {/* Item */}
           {suggestedUsers &&
             suggestedUsers?.map((user) => (
               <div
@@ -58,7 +57,7 @@ const SuggestedUsers = () => {
                     className={`text-black btn rounded-full btn-sm ${
                       user.isFollowing
                         ? " bg-blue-500 hover:bg-blue-500/90 "
-                        : "bg-white    hover:bg-white hover:opacity-90 "
+                        : "bg-white hover:bg-white hover:opacity-90"
                     }`}
                     onClick={() => handleFollowUser(user._id)}
                   >

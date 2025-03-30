@@ -14,6 +14,7 @@ import Sidebar from "./components/Sidebar";
 import ProfilePage from "./pages/ProfilePage";
 import NotificationPage from "./pages/NotificationPage";
 import SuggestedUsers from "./components/SuggestedUsers";
+import MessagesPage from "./pages/MessagesPage";
 
 const App = () => {
   const { authenticatedUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -29,64 +30,79 @@ const App = () => {
       </div>
     );
 
-  return (
-    <div className="container mx-auto px-4 h-screen overflow-hidden">
-      <Navbar />
-      <div className="grid grid-cols-5 gap-10 h-full mb-52">
-        <div className="col-span-1">{authenticatedUser && <Sidebar />}</div>
+    return (
+      <div className="container mx-auto px-4 h-screen flex flex-col overflow-hidden">
+        <div className=" flex-shrink-0">
+          <Navbar/>
+        </div>
+        <div className="flex flex-1 gap-10 overflow-hidden">
 
-        <div className="col-span-3 pb-24 overflow-y-scroll">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                authenticatedUser ? <HomePage /> : <Navigate to="/login" />
-              }
-            />
-            <Route
-              path="/signup"
-              element={
-                !authenticatedUser ? <SignUpPage /> : <Navigate to="/" />
-              }
-            />
-            <Route
-              path="/login"
-              element={!authenticatedUser ? <LoginPage /> : <Navigate to="/" />}
-            />
-            <Route
-              path="/profile/:username"
-              element={
-                authenticatedUser ? <ProfilePage /> : <Navigate to="/login" />
-              }
-            />
-            <Route
-              path="/notifications"
-              element={
-                authenticatedUser ? (
-                  <NotificationPage />
-                ) : (
-                  <Navigate to="/login" />
-                )
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                authenticatedUser ? <SettingsPage /> : <Navigate to="/login" />
-              }
-            />
-          </Routes>
+          {/* Sidebar - Left-side fixed */}
+          <div className="w-1/5 flex-shrink-0">
+            {authenticatedUser && <Sidebar />}
+          </div>
+          
+          {/* Main content - scrollable */}
+          <div className="w-3/5 overflow-y-auto pb-24" style={{ scrollbarWidth: 'none' }}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  authenticatedUser ? <HomePage /> : <Navigate to="/login" />
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  !authenticatedUser ? <SignUpPage /> : <Navigate to="/" />
+                }
+              />
+              <Route
+                path="/login"
+                element={!authenticatedUser ? <LoginPage /> : <Navigate to="/" />}
+              />
+              <Route
+                path="/profile/:username"
+                element={
+                  authenticatedUser ? <ProfilePage /> : <Navigate to="/login" />
+                }
+              />
+              <Route
+                path="/messages"
+                element={
+                  authenticatedUser ? <MessagesPage /> : <Navigate to="/login" />
+                }
+              />
+              <Route
+                path="/notifications"
+                element={
+                  authenticatedUser ? <NotificationPage /> : <Navigate to="/login" />
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  authenticatedUser ? <SettingsPage /> : <Navigate to="/login" />
+                }
+              />
+            </Routes>
+          </div>
+          
+          {/* Suggested Users - Right-side fixed */}
+          <div className="w-1/5 flex-shrink-0">
+            {authenticatedUser && <SuggestedUsers />}
+          </div>
         </div>
-        <div className="col-span-1">
-          {authenticatedUser && <SuggestedUsers />}
-        </div>
+        
+        {/* Toaster */}
         <Toaster position="bottom-center" />
-        <div className="relative flex items-center justify-center">
+        
+        {/* Background */}
+        <div className="fixed inset-0 -z-10">
           <OceanBackground />
         </div>
       </div>
-    </div>
-  );
+    );
 };
 
 export default App;
