@@ -39,6 +39,8 @@ export const searchUsers = async (req, res) => {
 export const followUnfollowUser = async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id;
+
+    const io = req.app.get('socketio');
     try {
         const userToFollow = await User.findById(id);
         const currentUser = await User.findById(userId);
@@ -60,11 +62,21 @@ export const followUnfollowUser = async (req, res) => {
             const user = await User.findByIdAndUpdate(id, { $push: { followers: userId } }, { new: true }).select("-password");
             await User.findByIdAndUpdate(userId, { $push: { following: id } }, { new: true });
 
-            await Notification.create({
+            const newNotification = await Notification.create({
                 from: userId,
                 to: user,
                 type: 'follow',
             });
+
+            //Updating Notification socket
+            const populatedNotification = await Notification.findById(newNotification._id).populate('from', 'username fullName profilePic').lean();
+            const unreadNotificationCount = await Notification.countDocuments({ to: id, read: false });
+            if (populatedNotification) {
+                io.to(id.toString()).emit('newNotification', populatedNotification);
+            }
+            if (unreadNotificationCount > 0) {
+                io.to(id.toString()).emit('newNotificationCount', unreadNotificationCount);
+            }
 
             res.status(200).json({ data: user, message: "You are now following this user." });
         }

@@ -28,7 +28,7 @@ interface CatchState {
     deleteCatch: (id: string) => Promise<void>;
 
     addComment: (id: string, text: string) => Promise<void>;
-    updateComment:  (id: string, commentId: string, text: string) => Promise<void>;
+    updateComment: (id: string, commentId: string, text: string) => Promise<void>;
     deleteComment: (id: string, commentId: string) => Promise<void>;
 }
 
@@ -55,7 +55,7 @@ export const useCatchStore = create<CatchState>((set) => ({
             set({ isFetchingCatches: false });
         }
     },
-    
+
     fetchCatchesFeed: async () => {
         set({ isFetchingCatches: true });
         try {
@@ -87,8 +87,9 @@ export const useCatchStore = create<CatchState>((set) => ({
             const res = await axiosInstance.post("/catches/", formData);
             toast.success("Catch added successfully");
             const newCatch = res.data;
-             set((state) => ({
-                 feedCatches: [newCatch, ...(state.feedCatches || [])], }));
+            set((state) => ({
+                feedCatches: [newCatch, ...(state.feedCatches || [])],
+            }));
         } catch (error: any) {
             console.log("Error in add catch controller", error);
             toast.error(error.response.data.message);
@@ -104,7 +105,7 @@ export const useCatchStore = create<CatchState>((set) => ({
             set((state) => ({
                 feedCatches: state.feedCatches?.filter((catchPost) => catchPost._id !== id),
             }));
-            
+
             toast.success("Catch deleted successfully");
         } catch (error: any) {
             console.log("Error in delete catch controller", error);
@@ -138,12 +139,10 @@ export const useCatchStore = create<CatchState>((set) => ({
                 feedCatches: state.feedCatches?.map((catchPost) => {
                     if (catchPost._id === id) {
                         catchPost.comments = data.comments;
-                        console.log(catchPost);
                     }
                     return catchPost;
                 }),
             }));
-            console.log(data)
             toast.success("Comment added successfully");
         } catch (error: any) {
             console.log("Error in addComment controller", error);
@@ -153,7 +152,7 @@ export const useCatchStore = create<CatchState>((set) => ({
         }
     },
 
-    updateComment: async (id: string, commentId : string, text: string) => {
+    updateComment: async (id: string, commentId: string, text: string) => {
         set({ isUpdatingComment: true });
         try {
             const { data } = await axiosInstance.put(`/catches/${id}/comments/${commentId}`, { text });
@@ -161,14 +160,13 @@ export const useCatchStore = create<CatchState>((set) => ({
                 feedCatches: state.feedCatches?.map((catchPost) => {
                     if (catchPost._id === id) {
                         catchPost.comments = data.comments;
-                        console.log(catchPost);
                     }
                     return catchPost;
                 }),
             }))
-            console.log(data)
+            // console.log(data)
             toast.success("Comment updated successfully");
-        }catch (error: any) {
+        } catch (error: any) {
             console.log("Error in addComment controller", error);
             toast.error(error.response.data.message);
         } finally {
@@ -192,7 +190,7 @@ export const useCatchStore = create<CatchState>((set) => ({
             console.log("Error in deleteComment controller", error);
             toast.error(error.response.data.message);
         }
-    },  
+    },
 
-    
+
 }));

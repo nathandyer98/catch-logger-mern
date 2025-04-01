@@ -10,11 +10,18 @@ const NotificationPage = () => {
     deleteNotification,
     deleteAllNotifications,
     fetchNotifications,
+    subscribeToNotifications,
+    unsubscribeFromNotifications,
   } = useNotificationStore();
 
   useEffect(() => {
     fetchNotifications();
-  }, [fetchNotifications]);
+    subscribeToNotifications();
+
+    return () => {
+      unsubscribeFromNotifications();
+    };
+  }, [fetchNotifications, subscribeToNotifications, unsubscribeFromNotifications]);
 
   const handleDeleteAllNotifications = () => {
     deleteAllNotifications();

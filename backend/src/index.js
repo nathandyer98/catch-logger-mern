@@ -9,10 +9,10 @@ import userRoute from "../routes/user.route.js"
 import notificationRoute from "../routes/notification.route.js"
 import converstaionRoute from "../routes/conversation.route.js"
 
+import { app, server } from "../lib/socket.js";
 import { connectDB } from "../lib/db.js";
 
 dotenv.config();
-const app = express();
 
 const PORT = process.env.PORT || 5001;
 
@@ -29,7 +29,7 @@ app.use("/api/users", userRoute);
 app.use("/api/notifications", notificationRoute);
 app.use("/api/conversations", converstaionRoute)
 
-app.listen(PORT, () => {
-    console.log("Server is running on port:",PORT);
+server.listen(PORT, () => {
+    console.log("Server is running on port:", PORT);
     connectDB();
 })
