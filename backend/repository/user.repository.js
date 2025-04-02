@@ -11,6 +11,15 @@ class UserRepository {
     }
 
     /**
+     * Find a user by ID. Excludes password by default.
+     * @param {string} userId - User's ID
+     * @returns {Promise<object|null>} - A User (mongoose) object or null 
+     */
+    async findByIdMongooseDoc(userId) {
+        return User.findById(userId).select("-password");
+    }
+
+    /**
      * Find a user by email.Excludes password by default.
      * @param {string} email - User's Email
      * @returns {Promise<object|null>} - Plain User object without password or null
@@ -54,7 +63,7 @@ class UserRepository {
      */
     async createUser(userData) {
         const newUser = new User(userData);
-        await newUser.save();
+        await newUser.save({ new: true });
         const userObject = newUser.toObject();
         delete userObject.password;
         return userObject;
@@ -66,7 +75,7 @@ class UserRepository {
      * @param {object} userData - Fields to update
      * @return {Promise<object|null>} - Plain User object (excluding password) or null if not found
      */
-    async updateUseById(userId, userData) {
+    async updateUserById(userId, userData) {
         return User.findByIdAndUpdate(userId, userData, { new: true, runValidators: true }).select("-password").lean();
     }
 

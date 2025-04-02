@@ -1,74 +1,41 @@
-import { generateToken } from "../lib/utils.js";
-import User from "../models/user.model.js";
-import bcrypt from "bcryptjs";
-import cloudinary from "../lib/cloudinary.js";
+import * as AuthService from "../service/auth.service.js"
+import { handleControllerError } from '../utils/errorHandler.js';
+import { generateToken } from "../utils/generateToken.js";
 
 export const signup = async (req, res) => {
     const { fullName, email, password, username } = req.body;
+
+    if (!fullName.trim() || !username.trim() || !email.trim() || !password.trim()) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
+    if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters" });
+    }
     try {
-        if (!fullName.trim() || !username.trim() || !email.trim() || !password.trim() ) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
-        if(password.length < 8) {
-            return res.status(400).json({ message: "Password must be at least 8 characters" });
-        }
+        const newUser = await AuthService.signUpUser({ fullName, email, password, username })
+        generateToken(newUser._id, res);
 
-        const userEmail = await User.findOne({ email });
-        if(userEmail) {
-            return res.status(400).json({ message: "Email already exists" });
-        }
-
-        const user = await User.findOne({ username });
-        if(user) {
-            return res.status(400).json({ message: "Username already taken - please choose another" });
-        }
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const newUser = new User({
-            fullName,
-            username: username.toLowerCase(),
-            email: email.toLowerCase(),
-            password: hashedPassword,
-        });
-
-        if(newUser) {
-            generateToken(newUser._id, res);
-            await newUser.save();
-
-            res.status(201).json({_id: newUser._id, fullName: newUser.fullName, username: newUser.username, email: newUser.email, profilePic: newUser.profilePic});
-        }else{
-            return res.status(400).json({ message: "Invalid user data" });
-        }
-
+        res.status(201).json(newUser);
     } catch (error) {
-        console.log("Error in signup controller", error);
-        res.status(500).json({ message: "Internal server error" });
+        console.error("---Sign Up Controller Error---");
+        handleControllerError(error, res)
     }
 }
 
 export const login = async (req, res) => {
     const { email, password } = req.body;
+
+    if (!email.trim() || !password.trim()) {
+        return res.status(400).json({ message: "Email and Password are required" });
+    }
     try {
-        const user = await User.findOne({ email });
+        const loggedInUser = await AuthService.loginUser(email, password)
+        generateToken(loggedInUser._id, res);
 
-        if(!user) {
-            return res.status(400).json({ message: "Invalid Credentials" });
-        }
-
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);
-
-        if(!isPasswordCorrect) {
-            return res.status(400).json({ message: "Invalid Credentials" });
-        }
-
-        generateToken(user._id, res);
-
-        res.status(200).json({_id: user._id, fullName: user.fullName, username: user.username, email: user.email, profilePic: user.profilePic});
+        res.status(200).json(loggedInUser);
     } catch (error) {
-        console.log("Error in login controller", error);
-        res.status(500).json({ message: "Internal server error" });        
+        console.error("---Login Controller Error---");
+        handleControllerError(error, res)
     }
 }
 
@@ -77,49 +44,26 @@ export const logout = (req, res) => {
         res.cookie("jwt", "", { maxAge: 0 });
         res.status(200).json({ message: "Logged out successful" });
     } catch (error) {
-        console.log("Error in logout controller", error);
-        res.status(500).json({ message: "Internal server error" });
+        console.error("---Logout Controller Error---");
+        handleControllerError(error, res)
     }
 }
 
 export const updateProfile = async (req, res) => {
     const { fullName, profilePic } = req.body;
     const userId = req.user._id
-    try{
-        if(!fullName && !profilePic) {
-            return res.status(400).json({ message: "No data provided" });
-        }
-        const user = await User.findById(userId);  
-        if(!user)return res.status(404).json({ message: "User not found" });
 
-        const updateFields = {};
+    if (!fullName && !profilePic) {
+        return res.status(400).json({ message: "No data provided" });
+    }
 
-        if (fullName) {
-            updateFields.fullName = fullName;
-        }
-
-        if (profilePic) {
-            if(user.profilePic){
-                await cloudinary.uploader.destroy(user.profilePic.split('/').pop().split('.')[0]);  
-            }
-            const uploadedResponse = await cloudinary.uploader.upload(profilePic, { folder: "user_profiles" });
-            updateFields.profilePic = uploadedResponse.secure_url;
-        }
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            { $set: updateFields },
-            { new: true, runValidators: true } 
-        );
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
+    try {
+        const updatedUser = AuthService.updateUserProfile(userId, { fullName, profilePic })
         res.status(200).json(updatedUser);
-    }catch (error) {
-        console.log("Error in updateProfile controller", error);
-        res.status(500).json({ message: "Internal server error" });
-    }   
+    } catch (error) {
+        console.error("---Updating Controller Error---");
+        handleControllerError(error, res)
+    }
 }
 
 export const checkAuth = async (req, res) => {

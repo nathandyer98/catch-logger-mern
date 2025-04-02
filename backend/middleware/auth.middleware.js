@@ -21,7 +21,19 @@ export const authenticatedRoute = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        console.log("Error in auth middleware", error);
+        console.log("Error in authenticatedRoute middleware", error);
+
+        //Handling JWT specific errors
+        if (error instanceof jwt.TokenExpiredError) {
+            return res.status(401).json({ message: "Unauthorized - Token expired" });
+        }
+        if (error instanceof jwt.JsonWebTokenError) {
+            return res.status(401).json({ message: "Unauthorized - Invalid token" });
+        }
+        if (error instanceof jwt.NotBeforeError) {
+            return res.status(401).json({ message: "Unauthorized - Token not active yet" });
+        }
+
         res.status(500).json({ message: "Internal server error" });
     }
 }
