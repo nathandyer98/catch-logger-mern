@@ -119,7 +119,7 @@ export const useCatchStore = create<CatchState>((set) => ({
             set((state) => ({
                 feedCatches: state.feedCatches?.map((catchPost) => {
                     if (catchPost._id === id) {
-                        catchPost.likes = data.data;
+                        catchPost.likes = data.catchLikes;
                         console.log(catchPost);
                     }
                     return catchPost;
@@ -138,7 +138,7 @@ export const useCatchStore = create<CatchState>((set) => ({
             set((state) => ({
                 feedCatches: state.feedCatches?.map((catchPost) => {
                     if (catchPost._id === id) {
-                        catchPost.comments = data.comments;
+                        catchPost.comments = data;
                     }
                     return catchPost;
                 }),
@@ -159,12 +159,11 @@ export const useCatchStore = create<CatchState>((set) => ({
             set((state) => ({
                 feedCatches: state.feedCatches?.map((catchPost) => {
                     if (catchPost._id === id) {
-                        catchPost.comments = data.comments;
+                        catchPost.comments = data;
                     }
                     return catchPost;
                 }),
             }))
-            // console.log(data)
             toast.success("Comment updated successfully");
         } catch (error: any) {
             console.log("Error in addComment controller", error);

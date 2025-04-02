@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import { axiosInstance } from "../services/api-client";
-
 import { Notification, NotificationHandler, NotificationCountHandler } from "../types/notifcations";
-import toast from "react-hot-toast";
-
 import { useAuthStore } from "./useAuthStore";
-
+import toast from "react-hot-toast";
 
 interface NotificationState {
     notifications: Notification[] | null;
@@ -106,7 +103,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         get()._setHandlers({ notificationHandler, notificationCountHandler });
 
         socket.on("newNotification", notificationHandler);
-        socket.on("newNotificationCount", notificationCountHandler);
+        socket.on("updateNotificationCount", notificationCountHandler);
 
         console.log("Succcessfully subscribed to notifications");
     },
@@ -117,7 +114,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         const storedNotificationHandler = get()._notificationHandlerRef;
         const storedNotificationCountHandler = get()._notificationCountHandlerRef;
 
-        console.log("Attempted to unsubscribe from notifications");
+        console.log("Attempting to unsubscribe from notifications");
 
         if (socket) {
             if (storedNotificationHandler) {
