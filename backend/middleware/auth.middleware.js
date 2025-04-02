@@ -1,22 +1,21 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import UserRepository from "../repository/user.repository.js";
 
 export const authenticatedRoute = async (req, res, next) => {
     try {
         const token = req.cookies.jwt;
 
-        if(!token){
+        if (!token) {
             return res.status(401).json({ message: "Unauthorized - No token" });
         }
+
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
 
-        if(!decodedToken){
-            return res.status(401).json({ message: "Unauthorized - No token" });
-        }
-        const user = await User.findById(decodedToken.userId).select("email username fullName profilePic createdAt updatedAt");
+        const user = await UserRepository.findById(decodedToken.userId);
 
-        if(!user){
-            return res.status(404).json({ message: "User not found" });
+        if (!user) {
+            return res.status(404).json({ message: "User associated with this token not found" });
         }
 
         req.user = user;
