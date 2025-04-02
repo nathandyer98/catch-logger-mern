@@ -49,7 +49,7 @@ export const logout = (req, res) => {
     }
 }
 
-export const updateProfile = async (req, res) => {
+export const updateUserProfile = async (req, res) => {
     const { fullName, profilePic } = req.body;
     const userId = req.user._id
 

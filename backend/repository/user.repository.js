@@ -20,7 +20,7 @@ class UserRepository {
     }
 
     /**
-     * Find a user by email.Excludes password by default.
+     * Find a user by email. Excludes password by default.
      * @param {string} email - User's Email
      * @returns {Promise<object|null>} - Plain User object without password or null
      */
@@ -38,17 +38,26 @@ class UserRepository {
     }
 
     /**
-     * Find a user by username. Excludes password by default
+     * Find a user by username. Excludes password by default.
      * @param {*} username - User's Username
      * @returns {Promise<object|null>} - Plain User object or null
      */
     async findByUsername(username) {
-        return User.findOne({ username }).lean();
+        return User.findOne({ username }).select("-password").lean();
+    }
+
+    /**
+    * Find a user by username. Excludes password by default.
+    * @param {*} username - User's Username
+    * @returns {Promise<object|null>} - A User (mongoose) object or null 
+    */
+    async findByUsernameMongooseDoc(username) {
+        return User.findOne({ username }).select("-password");
     }
 
     /**
      * Check if a user exists based on a query criteria. (Email and Username)
-     * @param {object} query - e.g. {email: "test@emample.com", username: "testUser"}
+     * @param {object} query - e.g, {email: "test@emample.com", username: "testUser"}
      * @return {Promise<boolean>} - True if user exists, false otherwise
      */
     async userExists(query) {
@@ -70,7 +79,7 @@ class UserRepository {
     }
 
     /**
-     * Update a user by ID
+     * Update a user by ID.
      * @param {string} userId - The ID of the user to update
      * @param {object} userData - Fields to update
      * @return {Promise<object|null>} - Plain User object (excluding password) or null if not found
@@ -79,6 +88,64 @@ class UserRepository {
         return User.findByIdAndUpdate(userId, userData, { new: true, runValidators: true }).select("-password").lean();
     }
 
+    /**
+     * Find users matching the username query, excluding current user in search.
+     * @param {string} usernameQuery - A query string to search within users' usernames.
+     * @param {string} currentUserId -  The ID of the user performing the search (to exclude them).
+     * @return {Promise<Array<object>>|null>} - A list of plain user objects (excluding password, and email) matching the query.
+     */
+    async findUsersByUsernameQuery(currentUserId, usernameQuery) {
+        return await User.find({ username: { $regex: usernameQuery, $options: "i" }, _id: { $ne: currentUserId } })
+            .select("-password -email")
+            .limit(10)
+            .lean();
+    }
+
+    /**
+     * Follow a user by Id and return the target User.
+     * @param {string} currentUserId - The ID of the current user
+     * @param {string} targetUserId - The ID of the target user the current user intends to follow
+     * @return {Promise<object|null>} - Plain User object (excluding password) or null if not found
+     */
+    async followUserById(currentUserId, targetUserId) {
+        await User.findByIdAndUpdate(currentUserId, { $push: { following: targetUserId } }, { new: true });
+        return await User.findByIdAndUpdate(targetUserId, { $push: { followers: currentUserId } }, { new: true }).select("-password").lean();
+    }
+
+    /**
+    * Unfollow a user by Id and return the target User.
+    * @param {string} currentUserId - The ID of the current user
+    * @param {string} targetUserId - The ID of the target user the current user intends to unfollow
+    * @return {Promise<object|null>} - Plain User object (excluding password) or null if not found
+    */
+    async unfollowUserById(currentUserId, targetUserId) {
+        await User.findByIdAndUpdate(currentUserId, { $pull: { following: targetUserId } }, { new: true });
+        return await User.findByIdAndUpdate(targetUserId, { $pull: { followers: currentUserId } }, { new: true }).select("-password").lean();
+    }
+
+    /**
+     * Retrieves the list of user IDs that a specific user is following.
+     * @param {string} userId - The ID of the user whose 'following' list is to be fetched
+     * @return {Promise<object|null>} - A User object containing the user's _id and their 'following' array, or null if the user is not found.
+     */
+    async getFollowingList(userId) {
+        return await User.findById(userId).select('following').lean();
+    }
+
+    /**
+     * Fetches a limited sample of users, excluding a specific user by ID.
+     * Only includes essential profile fields in the results.
+     * @param {string} userId - The ID of the user to exclude from the results.
+     * @return {Promise<Array<object>>} - An array of up to 10 plain user objects, excluding the specified user.
+     * Each object contains the _id, fullName, username, and profilePic.
+     * Returns an empty array ([]) if no other users are found.
+     */
+    async findOtherUsersSample(userId) {
+        return await User.find({ _id: { $ne: userId } })
+            .limit(10)
+            .select("_id fullName username profilePic")
+            .lean();
+    }
 }
 
 export default new UserRepository();
