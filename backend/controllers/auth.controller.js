@@ -1,4 +1,4 @@
-import * as AuthService from "../service/auth.service.js"
+import * as AuthService from "../services/auth.service.js"
 import { handleControllerError } from '../utils/errorHandler.js';
 import { generateToken } from "../utils/generateToken.js";
 
@@ -58,7 +58,7 @@ export const updateUserProfile = async (req, res) => {
     }
 
     try {
-        const updatedUser = AuthService.updateUserProfile(userId, { fullName, profilePic })
+        const updatedUser = await AuthService.updateUserProfile(userId, { fullName, profilePic })
         res.status(200).json(updatedUser);
     } catch (error) {
         console.error("---Updating Controller Error---");

@@ -95,7 +95,7 @@ class UserRepository {
      * @return {Promise<Array<object>>|null>} - A list of plain user objects (excluding password, and email) matching the query.
      */
     async findUsersByUsernameQuery(currentUserId, usernameQuery) {
-        return await User.find({ username: { $regex: usernameQuery, $options: "i" }, _id: { $ne: currentUserId } })
+        return User.find({ username: { $regex: usernameQuery, $options: "i" }, _id: { $ne: currentUserId } })
             .select("-password -email")
             .limit(10)
             .lean();
@@ -109,7 +109,7 @@ class UserRepository {
      */
     async followUserById(currentUserId, targetUserId) {
         await User.findByIdAndUpdate(currentUserId, { $push: { following: targetUserId } }, { new: true });
-        return await User.findByIdAndUpdate(targetUserId, { $push: { followers: currentUserId } }, { new: true }).select("-password").lean();
+        return User.findByIdAndUpdate(targetUserId, { $push: { followers: currentUserId } }, { new: true }).select("-password").lean();
     }
 
     /**
@@ -120,7 +120,7 @@ class UserRepository {
     */
     async unfollowUserById(currentUserId, targetUserId) {
         await User.findByIdAndUpdate(currentUserId, { $pull: { following: targetUserId } }, { new: true });
-        return await User.findByIdAndUpdate(targetUserId, { $pull: { followers: currentUserId } }, { new: true }).select("-password").lean();
+        return User.findByIdAndUpdate(targetUserId, { $pull: { followers: currentUserId } }, { new: true }).select("-password").lean();
     }
 
     /**
@@ -129,7 +129,7 @@ class UserRepository {
      * @return {Promise<object|null>} - A User object containing the user's _id and their 'following' array, or null if the user is not found.
      */
     async getFollowingList(userId) {
-        return await User.findById(userId).select('following').lean();
+        return User.findById(userId).select('following').lean();
     }
 
     /**
@@ -141,7 +141,7 @@ class UserRepository {
      * Returns an empty array ([]) if no other users are found.
      */
     async findOtherUsersSample(userId) {
-        return await User.find({ _id: { $ne: userId } })
+        return User.find({ _id: { $ne: userId } })
             .limit(10)
             .select("_id fullName username profilePic")
             .lean();

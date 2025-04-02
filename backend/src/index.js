@@ -9,10 +9,12 @@ import userRoute from "../routes/user.route.js"
 import notificationRoute from "../routes/notification.route.js"
 import converstaionRoute from "../routes/conversation.route.js"
 
-import { app, server } from "../lib/socket.js";
+import { app, server, io } from "../lib/socket.js";
 import { connectDB } from "../lib/db.js";
+import { SocketService } from '../services/socket.service.js';
 
 dotenv.config();
+SocketService.initialize(io);
 
 const PORT = process.env.PORT || 5001;
 

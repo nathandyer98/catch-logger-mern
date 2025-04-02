@@ -87,7 +87,7 @@ export const updateUserProfile = async (userId, updatePayload) => {
     }
 
     try {
-        const updatedUser = UserRepository.updateUserById(userId, fieldsToUpdate);
+        const updatedUser = await UserRepository.updateUserById(userId, fieldsToUpdate);
         if (!updatedUser) {
             throw new NotFoundError("User not found during update operation.");
         }

@@ -1,5 +1,8 @@
 import UserRepository from "../repository/user.repository.js";
+import NotificationRepository from "../repository/notification.repository.js";
 import { NotFoundError, ServiceError } from '../errors/applicationErrors.js';
+import { SocketService } from '../services/socket.service.js';
+
 
 export const getUserProfile = async (username) => {
     const user = await UserRepository.findByUsername(username);
@@ -14,7 +17,7 @@ export const searchUsers = async (currentUserId, usernameQuery) => {
         const users = await UserRepository.findUsersByUsernameQuery(currentUserId, usernameQuery)
         return users
     } catch (error) {
-        console.log("Error searching users in repository", error);
+        console.log("Error searching users in repository: ", error);
         throw new ServiceError("Failed to search users due to a service issue.");
     }
 }
@@ -22,7 +25,7 @@ export const searchUsers = async (currentUserId, usernameQuery) => {
 export const followUnfollowUser = async (currentUserId, targetUserId) => {
     const currentUser = await UserRepository.findByIdMongooseDoc(currentUserId)
     const targetUser = await UserRepository.findById(targetUserId)
-    if (!targetUser) {
+    if (!targetUser || !currentUser) {
         throw new NotFoundError("User not found");
     }
 
@@ -37,12 +40,18 @@ export const followUnfollowUser = async (currentUserId, targetUserId) => {
             user = await UserRepository.followUserById(currentUserId, targetUserId);
             message = "You are now following this user."
 
-            //Call create notification repo
-            //emit notification
+            const newNotification = await NotificationRepository.createNotification({
+                from: currentUserId,
+                to: targetUserId,
+                type: 'follow'
+            })
+            if (newNotification && targetUserId) {
+                await SocketService.notifyUserOfNotification(targetUserId, newNotification._id);
+            }
         }
         return { user, message }
     } catch (error) {
-        console.log("Error following/unfollowing in repository", error);
+        console.log("Error following/unfollowing in repository: ", error);
         throw new ServiceError("Failed to follow/unfollow user due to service issue.");
     }
 }
