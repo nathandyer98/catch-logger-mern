@@ -1,5 +1,4 @@
 import Catch from "../models/catch.model.js";
-import User from "../models/user.model.js";
 
 class CatchRepository {
 
@@ -96,7 +95,7 @@ class CatchRepository {
      */
     async createCatch(catchData) {
         const newCatch = new Catch(catchData);
-        await newCatch.save({ new: true });
+        await newCatch.save();
         const catchObject = newCatch.toObject();
         return catchObject;
     }

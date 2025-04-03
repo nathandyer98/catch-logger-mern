@@ -66,13 +66,23 @@ class UserRepository {
     }
 
     /**
+     * Do users exist based on an array of user IDs
+     * @param {Array<string>} userIds - Array of user IDs
+     * @returns {Promise<boolean>} - True if all users exist, false otherwise
+     */
+    async checkUsersExist(userIds) {
+        const userCount = await User.countDocuments({ _id: { $in: userIds } })
+        return userCount === userIds.length
+    }
+
+    /**
      * Create a new user. 
      * @param {object} userData - Data for new users (password should be hashed)
      * @returns {Promise<object>} - Plain User object created by the user (excluding password)
      */
     async createUser(userData) {
         const newUser = new User(userData);
-        await newUser.save({ new: true });
+        await newUser.save();
         const userObject = newUser.toObject();
         delete userObject.password;
         return userObject;

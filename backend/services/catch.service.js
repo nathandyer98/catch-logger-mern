@@ -8,7 +8,6 @@ import {
     ServiceError
 } from '../errors/applicationErrors.js';
 import { SocketService } from '../services/socket.service.js';
-import User from "../models/user.model.js";
 
 
 export const getAllCatches = async ({ page, limit }) => {
