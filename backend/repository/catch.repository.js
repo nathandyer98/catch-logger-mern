@@ -138,7 +138,6 @@ class CatchRepository {
      */
     async likeCatchById(catchId, userId) {
         const updatedCatch = await Catch.findByIdAndUpdate(catchId, { $push: { likes: userId } }, { new: true });
-        await User.findByIdAndUpdate(userId, { $push: { likedCatches: catchId } }, { new: true });
         return updatedCatch.likes;
     }
 
@@ -149,7 +148,6 @@ class CatchRepository {
      */
     async unlikeCatchById(catchId, userId) {
         const updatedCatch = await Catch.findByIdAndUpdate(catchId, { $pull: { likes: userId } }, { new: true });
-        await User.findByIdAndUpdate(userId, { $pull: { likedCatches: catchId } }, { new: true });
         return updatedCatch.likes;
     }
 

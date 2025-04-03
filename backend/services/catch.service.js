@@ -8,6 +8,7 @@ import {
     ServiceError
 } from '../errors/applicationErrors.js';
 import { SocketService } from '../services/socket.service.js';
+import User from "../models/user.model.js";
 
 
 export const getAllCatches = async ({ page, limit }) => {
@@ -123,9 +124,11 @@ export const likeUnlikeCatch = async (catchId, userId) => {
     try {
         if (catchToLikeUnlike.likes.includes(userId)) {
             catchLikes = await CatchRepository.unlikeCatchById(catchId, userId);
+            await UserRepository.unlikeCatchById(catchId, userId);
             message = "Catch Unliked";
         } else {
             catchLikes = await CatchRepository.likeCatchById(catchId, userId);
+            await UserRepository.likeCatchById(catchId, userId);
             message = "Liked Catch";
 
             if (catchToLikeUnlike.user._id.toString() !== userId.toString()) {

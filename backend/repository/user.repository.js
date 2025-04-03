@@ -146,6 +146,26 @@ class UserRepository {
             .select("_id fullName username profilePic")
             .lean();
     }
+
+    /**
+     * Like a catch by ID. And add it to the user's likedCatches.
+     * @param {string} catchId - The ID of the catch to like.
+     * @param {string} userId - The ID of the user who is liking the catch.
+     * @returns {Promise<void>} - A promise that resolves when the catch is liked.
+     */
+    async likeCatchById(catchId, userId) {
+        await User.findByIdAndUpdate(userId, { $push: { likedCatches: catchId } }, { new: true });
+    }
+
+    /**
+    * Unlike a catch by ID. And remove it from the user's likedCatches.
+    * @param {string} catchId - The ID of the catch to unlike.
+    * @param {string} userId - The ID of the user who is liking the catch.
+    * @returns {Promise<void>} - A promise that resolves when the catch is unliked.
+    */
+    async unlikeCatchById(catchId, userId) {
+        await User.findByIdAndUpdate(userId, { $pull: { likedCatches: catchId } }, { new: true });
+    }
 }
 
 export default new UserRepository();
