@@ -75,11 +75,20 @@ export const updateUserProfile = async (userId, updatePayload) => {
     }
 
     if (profilePic) {
-        if (user.profilePic) {
-            await cloudinary.uploader.destroy(user.profilePic.split('/').pop().split('.')[0]);
+        try {
+            if (user.profilePic) {
+                try {
+                    await cloudinary.uploader.destroy(user.profilePic.split('/').pop().split('.')[0]);
+                } catch (error) {
+                    console.warn("Cloudinary delete failed:", deletedResponse);
+                }
+            }
+            const uploadedResponse = await cloudinary.uploader.upload(profilePic, { folder: "user_profiles" });
+            fieldsToUpdate.profilePic = uploadedResponse.secure_url;
+        } catch (uploadError) {
+            console.error("Cloudinary upload failed:", uploadError);
+            throw new ServiceError("Failed to upload message image.");
         }
-        const uploadedResponse = await cloudinary.uploader.upload(profilePic, { folder: "user_profiles" });
-        fieldsToUpdate.profilePic = uploadedResponse.secure_url;
     }
 
     if (Object.keys(fieldsToUpdate).length === 0) {

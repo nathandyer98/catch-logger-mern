@@ -2,6 +2,10 @@ import Catch from "../models/catch.model.js";
 
 class CatchRepository {
 
+    //Populate options
+    userPopulate = { path: 'user', select: 'username fullName profilePic', };
+    commentsPopulate = { path: 'comments.user', select: 'username fullName profilePic', };
+
     /**
      * Get all catches with pagination
      * @param {number} page - The page number
@@ -16,8 +20,8 @@ class CatchRepository {
             .skip((page - 1) * limit)
             .limit(limit)
             .sort({ dateCaught: -1 })
-            .populate('user', 'username fullName profilePic')
-            .populate('comments.user', 'username fullName profilePic')
+            .populate(this.userPopulate)
+            .populate(this.commentsPopulate)
             .lean();
     }
 
@@ -36,8 +40,8 @@ class CatchRepository {
             .skip((page - 1) * limit)
             .limit(limit)
             .sort({ dateCaught: -1 })
-            .populate('user', 'username fullName profilePic')
-            .populate('comments.user', 'username fullName profilePic')
+            .populate(this.userPopulate)
+            .populate(this.commentsPopulate)
             .lean();
     }
 
@@ -56,8 +60,8 @@ class CatchRepository {
             .skip((page - 1) * limit)
             .limit(limit)
             .sort({ dateCaught: -1 })
-            .populate('user', 'username fullName profilePic')
-            .populate('comments.user', 'username fullName profilePic')
+            .populate(this.userPopulate)
+            .populate(this.commentsPopulate)
             .lean();
     }
 
@@ -70,8 +74,8 @@ class CatchRepository {
      */
     async getCatchById(catchId) {
         return Catch.findById(catchId)
-            .populate('user', 'username fullName profilePic')
-            .populate('comments.user', 'username fullName profilePic')
+            .populate(this.userPopulate)
+            .populate(this.commentsPopulate)
             .lean();
     }
 
@@ -84,8 +88,8 @@ class CatchRepository {
      */
     async getCatchByIdMongooseDoc(catchId) {
         return Catch.findById(catchId)
-            .populate('user', 'username fullName profilePic')
-            .populate('comments.user', 'username fullName profilePic')
+            .populate(this.userPopulate)
+            .populate(this.commentsPopulate)
     }
 
     /**
@@ -159,7 +163,7 @@ class CatchRepository {
      * Each comment contains the user's fullname, username and profile picture.
      */
     async commentOnCatchById(catchId, userId, comment) {
-        const updatedCatch = await Catch.findByIdAndUpdate(catchId, { $push: { comments: { user: userId, text: comment } } }, { new: true }).populate('comments.user', 'username fullName profilePic');
+        const updatedCatch = await Catch.findByIdAndUpdate(catchId, { $push: { comments: { user: userId, text: comment } } }, { new: true }).populate(this.commentsPopulate);
         return updatedCatch.comments;
     }
 
@@ -186,7 +190,7 @@ class CatchRepository {
             { _id: catchId, "comments._id": commentId },
             { $set: { "comments.$.text": comment, "comments.$.updatedAt": Date.now() } },
             { new: true }
-        ).populate('comments.user', 'username fullName profilePic');
+        ).populate(this.commentsPopulate);
         return updatedCatch.comments;
     }
 }

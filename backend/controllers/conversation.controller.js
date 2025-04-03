@@ -43,10 +43,8 @@ export const createConversation = async (req, res) => {
 export const deleteConversation = async (req, res) => {
     const { id } = req.params
     const userId = req.user._id
-
-    const userIdString = typeof userId === 'string' ? userId : userId.toString();
     try {
-        const message = await ConversationService.deleteConversation(id, userIdString);
+        const message = await ConversationService.deleteConversation(id, userId);
         res.status(200).json({ message });
     } catch (error) {
         console.log("---Delete Conversation Controller Error---", error);

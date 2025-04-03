@@ -1,6 +1,6 @@
 import ConversationRepository from "../repository/conversation.repository.js";
 import UserRepository from "../repository/user.repository.js";
-import { AuthenticationError, NotFoundError, ServiceError, UserInputError } from '../errors/applicationErrors.js';
+import { AuthenticationError, NotFoundError, ServiceError } from '../errors/applicationErrors.js';
 
 export const getAllConversationsForUser = async (userId) => {
     try {
@@ -14,13 +14,7 @@ export const getAllConversationsForUser = async (userId) => {
 
 export const getConversationById = async (conversationId, userId) => {
     try {
-        const conversation = await ConversationRepository.getConversationById(conversationId);
-        if (!conversation)
-            throw new NotFoundError("Conversation not found.");
-
-        const isUserInConversation = conversation.participants.some(participantId => participantId.equals(userId));
-        if (!isUserInConversation) throw new AuthenticationError("Unauthorized.");
-
+        const conversation = await await authoriseAndValidateConversation(conversationId, userId);
         return conversation;
     } catch (error) {
         console.log("Error fetching conversation in repository:", error);
@@ -59,12 +53,7 @@ export const createConversation = async (currentUserId, participants) => {
 }
 
 export const deleteConversation = async (conversationId, userId) => {
-    const conversationToUpdate = await ConversationRepository.getConversationById(conversationId);
-
-    if (!conversationToUpdate) throw new NotFoundError("Conversation not found.");
-
-    const isUserInConversation = conversationToUpdate.participants.some(participant => participant && participant._id && participant._id.toString() === userId);
-    if (!isUserInConversation) throw new AuthenticationError("Unauthorized.");
+    const conversationToUpdate = await authoriseAndValidateConversation(conversationId, userId);
 
     try {
         if (conversationToUpdate.type === "Direct") {
@@ -80,5 +69,55 @@ export const deleteConversation = async (conversationId, userId) => {
     } catch (error) {
         console.log("Error deleting conversation in repository:", error);
         throw new ServiceError("Failed to delete conversation due to a service issue.");
+    }
+}
+
+export const authoriseAndValidateConversation = async (conversationId, userId) => {
+    try {
+        const isUserInConversation = await ConversationRepository.isUserPartOfConversation(conversationId, userId);
+
+        if (!isUserInConversation) {
+            const conversationExists = await ConversationRepository.doesGroupConversationExistById(conversationId);
+            if (!conversationExists) {
+                throw new NotFoundError("Conversation not found.");
+            } else {
+                throw new AuthenticationError("Unauthorized.");
+            }
+        }
+        const conversation = await ConversationRepository.getConversationById(conversationId);
+        if (!conversation) throw new NotFoundError("Conversation not found.");
+
+        return conversation;
+    } catch (error) {
+        console.log("Error authorising and validating conversation:", error);
+        if (error instanceof AuthenticationError || error instanceof NotFoundError) {
+            throw error;
+        }
+        throw new ServiceError("Failed to authorize conversation due to a service issue.");
+    }
+
+}
+
+export const recordNewMessageActivity = async (conversationId, newMessage) => {
+    const conversation = await ConversationRepository.getConversationFields(conversationId, ['type', 'participants']);
+    if (!conversation) throw new NotFoundError("Conversation not found.");
+
+    let updatePayload = {
+        lastMessage: newMessage._id,
+        lastMessageAt: newMessage.createdAt || new Date(),
+        $addToSet: {}
+    };
+
+    if (conversation.type === "Direct") {
+        const participantIds = conversation.participants.map(p => typeof p === 'object' ? p._id : p);
+        updatePayload.$addToSet.accessedBy = participantIds;
+    }
+
+    if (Object.keys(updatePayload.$addToSet).length === 0) {
+        delete updatePayload.$addToSet;
+    }
+
+    if (Object.keys(updatePayload).length > 0) {
+        await ConversationRepository.updateConversation(conversationId, updatePayload);
     }
 }

@@ -85,6 +85,15 @@ class ConversationRepository {
         const conversation = await Conversation.findOne({ type: "Direct", participants: { $all: [user1Id, user2Id] } });
         return conversation !== null;
     }
+    /**
+     * Does coversation exist for the ID
+     * @param {string} consversationId - The ID of the conversation
+     * @returns {Promise<boolean>} - True if a conversation exists for the ID, false otherwise
+     */
+    async doesGroupConversationExistById(consversationId) {
+        const conversation = await Conversation.findById(consversationId);
+        return conversation !== null;
+    }
 
     /**
      * Find exisiting direct conversation between the users
@@ -139,6 +148,42 @@ class ConversationRepository {
      */
     async deleteConversation(conversationId) {
         return Conversation.findByIdAndDelete(conversationId);
+    }
+
+    /**
+     * Update a conversation by ID
+     * @param {string} conversationId - The ID of the conversation
+     * @param {object} updatePayload - The ID of the message
+     * @returns {Promise<object>} - A the updated conversation object as a plain object (excluding accessedBy by default)
+     * Contains the conversation details, including the all the participants's fullname, username and profile picture
+     * And the last message details, including the user's fullname, username and profile picture or null if there is no last message
+     */
+    async updateConversation(conversationId, updatePayload) {
+        return Conversation.findByIdAndUpdate(conversationId, updatePayload, { new: true, runValidators: true })
+            .populate(this.participantPopulate)
+            .populate(this.lastMessagePopulate)
+            .lean();
+    }
+
+    /**
+     * Is user apart of the conversation
+     * @param {string} conversationId - The ID of the conversation
+     * @param {string} userId - The ID of the user
+     * @returns {Promise<boolean>} - True if the user is apart of the conversation, false otherwise
+     */
+    async isUserPartOfConversation(conversationId, userId) {
+        const conversation = await Conversation.findOne({ _id: conversationId, participants: userId });
+        return conversation !== null;
+    }
+
+    /**
+     * Get conversation with specified fields
+     * @param {string} conversationId - The ID of the conversation
+     * @param {Array<String>} fields - The fields to select
+     * @returns {Promise<object>} - A plain conversation object with the specified fields
+     */
+    async getConversationFields(conversationId, fields) {
+        return Conversation.findById(conversationId).select(fields).lean();
     }
 
 }

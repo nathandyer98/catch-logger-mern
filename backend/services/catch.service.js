@@ -9,7 +9,6 @@ import {
 } from '../errors/applicationErrors.js';
 import { SocketService } from '../services/socket.service.js';
 
-
 export const getAllCatches = async ({ page, limit }) => {
     try {
         const catches = await CatchRepository.getCatches(page, limit);
@@ -49,14 +48,19 @@ export const getCatchesFeed = async (userId, { page, limit }) => {
 
 export const createCatch = async (catchData) => {
     const user = await UserRepository.findById(catchData.user);
-    console.log(user)
     if (!user) throw new NotFoundError("User not found.");
 
+    let photoUrl = null;
     if (catchData.photo) {
-        const uploadedResponse = await cloudinary.uploader.upload(catchData.photo, { folder: "catches" });
-        catchData.photo = uploadedResponse.secure_url;
+        try {
+            const uploadedResponse = await cloudinary.uploader.upload(catchData.photo, { folder: "messages" });
+            photoUrl = uploadedResponse.secure_url;
+        } catch (uploadError) {
+            console.error("Cloudinary upload failed:", uploadError);
+            throw new ServiceError("Failed to upload message photo."); // Or handle differently
+        }
     }
-
+    catchData = { ...catchData, photo: photoUrl };
     try {
         const createCatch = await CatchRepository.createCatch(catchData);
         const newCatch = await CatchRepository.getCatchById(createCatch._id);
@@ -67,19 +71,22 @@ export const createCatch = async (catchData) => {
     }
 }
 
-export const updateCatch = async (catchId, userId, updatePayload) => {
+export const updateCatch = async (catchId, userId, updateData) => {
     const catchToUpdate = await CatchRepository.getCatchById(catchId);
     if (!catchToUpdate) throw new NotFoundError("Catch not found.");
-
     if (!catchToUpdate.user === userId) throw new AuthenticationError("Not authorized to update this catch.");
 
-    if (updatePayload.photo) {
-        if (catchToUpdate.photo) {
-            await cloudinary.uploader.destroy(catchToUpdate.photo.split('/').pop().split('.')[0]);
+    let photoUrl = null;
+    if (updateData.photo) {
+        try {
+            const uploadedResponse = await cloudinary.uploader.upload(updateData.photo, { folder: "messages" });
+            photoUrl = uploadedResponse.secure_url;
+        } catch (uploadError) {
+            console.error("Cloudinary upload failed:", uploadError);
+            throw new ServiceError("Failed to upload message photo."); // Or handle differently
         }
-        const uploadedResponse = await cloudinary.uploader.upload(updatePayload.photo, { folder: "catches" });
-        updatePayload.photo = uploadedResponse.secure_url;
     }
+    const updatePayload = { ...updateData, photo: photoUrl };
     try {
         const updatedCatch = await CatchRepository.updateCatchById(catchId, updatePayload);
         return updatedCatch
@@ -92,18 +99,19 @@ export const updateCatch = async (catchId, userId, updatePayload) => {
 export const deleteCatch = async (catchId, userId) => {
     const catchToDelete = await CatchRepository.getCatchById(catchId);
     if (!catchToDelete) throw new NotFoundError("Catch not found.");
-
     if (!catchToDelete.user === userId) throw new AuthenticationError("Not authorized to delete this catch.");
 
     if (catchToDelete.photo) {
-        await cloudinary.uploader.destroy(catchToDelete.photo.split('/').pop().split('.')[0]);
+        try {
+            await cloudinary.uploader.destroy(catchToDelete.photo.split('/').pop().split('.')[0]);
+        } catch (error) {
+            console.log("Error deleting catch photo in repository:", error);
+            throw new ServiceError("Failed to delete catch photo due to a service issue.");
+        }
     }
-
-    let message;
     try {
         await CatchRepository.deleteCatchById(catchId);
-        message = "Catch deleted successfully";
-        return message
+        return "Catch deleted successfully";
     } catch (error) {
         console.log("Error deleting catch in repository:", error);
         throw new ServiceError("Failed to delete catch due to a service issue.");
