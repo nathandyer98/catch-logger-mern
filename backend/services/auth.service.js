@@ -46,18 +46,27 @@ export const signUpUser = async (userData) => {
 }
 
 export const loginUser = async (email, password) => {
-    const user = await UserRepository.findByEmailWithPassword(email)
-    if (!user) {
-        throw new AuthenticationError("Incorrect Email or Password")
+    try {
+        const user = await UserRepository.findByEmailWithPassword(email)
+        if (!user) {
+            throw new AuthenticationError("Incorrect Email or Password")
+        }
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
+            throw new AuthenticationError("Incorrect Email or Password")
+        }
+        delete user.password;
+        return user;
+    } catch (error) {
+        if (error instanceof AuthenticationError) {
+            throw error; // Re-throw the error if it's an authentication error
+        } else if (error instanceof NotFoundError) {
+            throw new NotFoundError("User not found");
+        }
+        // Handle other errors (e.g., database errors)
+        console.error("Error logging in user:", error);
+        throw new ServiceError("Failed to login due to a service issue.");
     }
-
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if (!isPasswordCorrect) {
-        return res.status(400).json({ message: "Invalid Credentials" });
-    }
-
-    delete user.password;
-    return user;
 }
 
 export const updateUserProfile = async (userId, updatePayload) => {
@@ -90,11 +99,9 @@ export const updateUserProfile = async (userId, updatePayload) => {
             throw new ServiceError("Failed to upload message image.");
         }
     }
-
     if (Object.keys(fieldsToUpdate).length === 0) {
         throw new UserInputError("No valid data provided for update");
     }
-
     try {
         const updatedUser = await UserRepository.updateUserById(userId, fieldsToUpdate);
         if (!updatedUser) {

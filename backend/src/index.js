@@ -12,9 +12,12 @@ import converstaionRoute from "../routes/conversation.route.js"
 import { app, server, io } from "../lib/socket.js";
 import { connectDB } from "../lib/db.js";
 import { SocketService } from '../services/socket.service.js';
+import { initializeRealtimeListeners } from './listeners/realtime.listener.js';
+import eventBus from './eventBus.js';
 
 dotenv.config();
 SocketService.initialize(io);
+initializeRealtimeListeners();
 
 const PORT = process.env.PORT || 5001;
 

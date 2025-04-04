@@ -1,13 +1,13 @@
 import CatchRepository from "../repository/catch.repository.js";
 import UserRepository from "../repository/user.repository.js";
 import NotificationRepository from "../repository/notification.repository.js";
+import * as NotificationService from "./notification.service.js";
 import cloudinary from "../lib/cloudinary.js";
 import {
     AuthenticationError,
     NotFoundError,
     ServiceError
 } from '../errors/applicationErrors.js';
-import { SocketService } from '../services/socket.service.js';
 
 export const getAllCatches = async ({ page, limit }) => {
     try {
@@ -138,16 +138,11 @@ export const likeUnlikeCatch = async (catchId, userId) => {
             await UserRepository.likeCatchById(catchId, userId);
             message = "Liked Catch";
 
-            if (catchToLikeUnlike.user._id.toString() !== userId.toString()) {
-                const newNotification = await NotificationRepository.createNotification({
-                    from: userId,
-                    to: catchToLikeUnlike.user._id,
-                    type: 'like'
-                })
-                if (newNotification && catchToLikeUnlike.user._id) {
-                    await SocketService.notifyUserOfNotification(catchToLikeUnlike.user._id, newNotification._id);
-                }
-            }
+            await NotificationService.createNotification({
+                from: userId,
+                to: catchToLikeUnlike.user._id,
+                type: "like",
+            });
         }
         return { catchLikes, message }
     } catch (error) {
@@ -166,16 +161,12 @@ export const createComment = async (catchId, userId, comment) => {
     try {
         const updatedComments = await CatchRepository.commentOnCatchById(catchId, userId, comment);
 
-        if (catchToComment.user._id.toString() !== userId.toString()) {
-            const newNotification = await NotificationRepository.createNotification({
-                from: userId,
-                to: catchToComment.user._id,
-                type: 'comment'
-            })
-            if (newNotification && catchToComment.user._id) {
-                await SocketService.notifyUserOfNotification(catchToComment.user._id, newNotification._id);
-            }
-        }
+        await NotificationService.createNotification({
+            from: userId,
+            to: catchToComment.user._id,
+            type: "comment",
+        });
+
         return updatedComments
     } catch (error) {
         console.log("Error creating comment in repository:", error);

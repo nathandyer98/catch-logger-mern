@@ -1,5 +1,6 @@
 import NotificationRepository from "../repository/notification.repository.js";
 import { NotFoundError, ServiceError, AuthorizationError } from '../errors/applicationErrors.js';
+import eventBus from "../src/eventBus.js";
 
 export const getNotifications = async (userId) => {
     try {
@@ -54,3 +55,29 @@ export const deleteNotification = async (notificationId, userId) => {
     }
 }
 
+export const createNotification = async (notificationData) => {
+    if (!notificationData.from || !notificationData.to || !notificationData.type) {
+        throw new ServiceError("Missing required fields for notification creation.");
+    }
+
+    const isRecipientTheSameAsSender = notificationData.from.toString() === notificationData.to.toString();
+    if (isRecipientTheSameAsSender) {
+        throw new ServiceError("Sender and recipient cannot be the same.");
+    }
+
+    try {
+        const newNotification = await NotificationRepository.createNotification(notificationData);
+
+        if (newNotification) {
+            eventBus.emit('notification:created', { notification: newNotification });
+            console.log(`Notification created and event emitted: ${newNotification._id}`);
+        } else {
+            console.warn("NotificationService: createNotification did not return a notification.");
+        }
+
+        return newNotification;
+    } catch (error) {
+        console.log("Error creating notification in repository: ", error.message);
+        throw new ServiceError("Failed to create notification due to a service issue.");
+    }
+}

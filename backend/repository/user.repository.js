@@ -76,6 +76,16 @@ class UserRepository {
     }
 
     /**
+     * Does user exist by ID?
+     * @param {string} userId - User ID to check
+     * @return {Promise<boolean>} - True if user exists, false otherwise
+     */
+    async doesUserExistById(userId) {
+        const user = await User.findOne({ _id: userId });
+        return user !== null;
+    }
+
+    /**
      * Create a new user. 
      * @param {object} userData - Data for new users (password should be hashed)
      * @returns {Promise<object>} - Plain User object created by the user (excluding password)

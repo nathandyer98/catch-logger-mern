@@ -1,8 +1,6 @@
 import UserRepository from "../repository/user.repository.js";
-import NotificationRepository from "../repository/notification.repository.js";
+import * as NotificationService from "./notification.service.js";
 import { NotFoundError, ServiceError } from '../errors/applicationErrors.js';
-import { SocketService } from '../services/socket.service.js';
-
 
 export const getUserProfile = async (username) => {
     const user = await UserRepository.findByUsername(username);
@@ -40,14 +38,11 @@ export const followUnfollowUser = async (currentUserId, targetUserId) => {
             user = await UserRepository.followUserById(currentUserId, targetUserId);
             message = "You are now following this user."
 
-            const newNotification = await NotificationRepository.createNotification({
+            await NotificationService.createNotification({
                 from: currentUserId,
                 to: targetUserId,
-                type: 'follow'
-            })
-            if (newNotification && targetUserId) {
-                await SocketService.notifyUserOfNotification(targetUserId, newNotification._id);
-            }
+                type: "follow",
+            });
         }
         return { user, message }
     } catch (error) {

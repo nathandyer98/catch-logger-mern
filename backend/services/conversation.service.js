@@ -1,6 +1,7 @@
 import ConversationRepository from "../repository/conversation.repository.js";
 import UserRepository from "../repository/user.repository.js";
 import { AuthenticationError, NotFoundError, ServiceError } from '../errors/applicationErrors.js';
+import eventBus from "../src/eventBus.js";
 
 export const getAllConversationsForUser = async (userId) => {
     try {
@@ -43,13 +44,19 @@ export const createConversation = async (currentUserId, participants) => {
         if (conversationType === "Group") {
             const allParticipants = Array.from(new Set([...participants, currentUserId]));
             const newConversation = await ConversationRepository.createGroupConversation(allParticipants);
+
+            if (newConversation) {
+                eventBus.emit('groupConversation:created', { conversation: newConversation });
+                console.log(`Group Conversation created and event emitted: ${newConversation._id}`);
+            } else {
+                console.warn("ConversationService: createGroupConversation did not return a conversation.");
+            }
             return newConversation;
         }
     } catch (error) {
         console.log("Error creating conversation in repository:", error);
         throw new ServiceError("Failed to create conversation due to a service issue.");
     }
-
 }
 
 export const deleteConversation = async (conversationId, userId) => {
@@ -61,6 +68,14 @@ export const deleteConversation = async (conversationId, userId) => {
             return "Direct conversation removed successfully";
         } else if (conversationToUpdate.type === "Group" && conversationToUpdate.participants.length > 1) {
             await ConversationRepository.removeParticipantFromGroupConversation(conversationId, userId);
+            const updatedConversation = await ConversationRepository.getConversationById(conversationId);
+
+            if (updatedConversation) {
+                eventBus.emit('conversation:updated', { conversation: updatedConversation });
+                console.log(`Conversation updated and event emitted: ${updatedConversation._id}`);
+            } else {
+                console.warn("ConversationService: updateConversation did not return a conversation.");
+            }
             return "You have left the group conversation successfully";
         } else if (conversationToUpdate.type === "Group" && conversationToUpdate.participants.length === 1) {
             await ConversationRepository.deleteConversation(conversationId);
@@ -86,7 +101,6 @@ export const authoriseAndValidateConversation = async (conversationId, userId) =
         }
         const conversation = await ConversationRepository.getConversationById(conversationId);
         if (!conversation) throw new NotFoundError("Conversation not found.");
-
         return conversation;
     } catch (error) {
         console.log("Error authorising and validating conversation:", error);
@@ -95,7 +109,6 @@ export const authoriseAndValidateConversation = async (conversationId, userId) =
         }
         throw new ServiceError("Failed to authorize conversation due to a service issue.");
     }
-
 }
 
 export const recordNewMessageActivity = async (conversationId, newMessage) => {
@@ -107,17 +120,21 @@ export const recordNewMessageActivity = async (conversationId, newMessage) => {
         lastMessageAt: newMessage.createdAt || new Date(),
         $addToSet: {}
     };
-
     if (conversation.type === "Direct") {
         const participantIds = conversation.participants.map(p => typeof p === 'object' ? p._id : p);
         updatePayload.$addToSet.accessedBy = participantIds;
     }
-
     if (Object.keys(updatePayload.$addToSet).length === 0) {
         delete updatePayload.$addToSet;
     }
-
     if (Object.keys(updatePayload).length > 0) {
-        await ConversationRepository.updateConversation(conversationId, updatePayload);
+        const updatedConversation = await ConversationRepository.updateConversation(conversationId, updatePayload);
+
+        if (updatedConversation) {
+            eventBus.emit('conversation:updated', { conversation: updatedConversation });
+            console.log(`Conversation updated and event emitted: ${updatedConversation._id}`);
+        } else {
+            console.warn("ConversationService: updateConversation did not return a conversation.");
+        }
     }
 }

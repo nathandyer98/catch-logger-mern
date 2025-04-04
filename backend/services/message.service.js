@@ -4,6 +4,7 @@ import cloudinary from "../lib/cloudinary.js";
 import {
     ServiceError
 } from '../errors/applicationErrors.js';
+import eventBus from "../src/eventBus.js";
 
 export const getMessagesForAConversation = async (conversationId, userId) => {
     await ConversationService.authoriseAndValidateConversation(conversationId, userId);
@@ -40,6 +41,12 @@ export const sendMessage = async (conversationId, userId, messageData) => {
     };
     try {
         const newMessage = await MessageRepository.createMessage(messagePayload);
+        if (newMessage) {
+            eventBus.emit('message:created', { message: newMessage });
+            console.log(`Message created and event emitted: ${newMessage._id}`);
+        } else {
+            console.warn("MessageService: createMessage did not return a message.");
+        }
         try {
             await ConversationService.recordNewMessageActivity(conversationId, newMessage);
         } catch (conversationUpdateError) {
@@ -50,7 +57,6 @@ export const sendMessage = async (conversationId, userId, messageData) => {
         console.log("Error in sendMessage: " + error);
         throw new ServiceError("Failed to send message due to a service issue.");
     }
-
 }
 
 
