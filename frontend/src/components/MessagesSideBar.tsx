@@ -5,6 +5,8 @@ import { useConversationStore } from "../store/useConversationStore";
 import { Conversation, LastMessage } from "../types/conversations";
 import { SquarePen, X } from "lucide-react";
 import CreateConversationModal from "./CreateConversationModal";
+import { Participant } from "../types/users";
+import { useAuthStore } from "../store/useAuthStore";
 
 const MessagesSideBar = () => {
   const {
@@ -13,8 +15,10 @@ const MessagesSideBar = () => {
     fetchConversations,
     selectedConversation,
     setSelectedConversation,
-    deleteConversation
+    deleteConversation,
   } = useConversationStore();
+
+  const { authenticatedUser } = useAuthStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
     
@@ -27,9 +31,13 @@ const MessagesSideBar = () => {
     setSelectedConversation("");
   }
 
+  const findOtherParticipants = (participants: Participant[]) => {
+    return participants.filter((participant) => participant._id !== authenticatedUser?._id.toString());
+  }
+
   const getDisplayName = (conversation: Conversation) => {
     if (conversation.type === "Direct") {
-      return conversation.participants[0]?.username;
+      return findOtherParticipants(conversation.participants)[0]?.username;
     } else {
       return conversation.participants.map((p) => p.username).join(", ");
     }
@@ -37,7 +45,7 @@ const MessagesSideBar = () => {
 
   const getDisplayImage = (conversation: Conversation) => {
     if (conversation.type === "Direct") {
-      return conversation.participants[0]?.profilePic;
+      return findOtherParticipants(conversation.participants)[0]?.profilePic;
     } else {
       return "/group-avatar.png";
     }
@@ -120,6 +128,7 @@ const ConversationItems: React.FC<ConversationItemsProps> = ({ id, name, convers
         {lastMessage && (<span className="text-sm text-gray-600 truncate">{`${lastMessage.from.username}: ${lastMessage.text}`}</span>)}
         </div>
         </div>
+          {/* TODO: Future: Popup to confirm delete */}
         <button className="p-1 hover:opacity-80 rounded-full flex-shrink-0transition-all" onClick={onDeleteClick}><X className="w-6 h-6 z-20" /></button>
       </div>
   );

@@ -1,9 +1,17 @@
 import { X } from "lucide-react";
 import { useConversationStore } from "../store/useConversationStore";
+import { Participant } from "../types/users";
+import { useAuthStore } from "../store/useAuthStore";
 
 const MessagesHeader = () => {
   const { selectedConversation, setSelectedConversation } =
     useConversationStore();
+
+  const { authenticatedUser } = useAuthStore();
+
+  const findOtherParticipants = (participants: Participant[]) => {
+      return participants.filter((participant) => participant._id !== authenticatedUser?._id.toString());
+  }
 
   return (
     <div className="p-2.5 border-b border-transparent/95">
@@ -15,7 +23,7 @@ const MessagesHeader = () => {
               <img
                 src={
                   selectedConversation?.type === "Direct"
-                    ? selectedConversation.participants[0]?.profilePic || "/avatar.png"
+                    ? findOtherParticipants(selectedConversation.participants)[0]?.profilePic || "/avatar.png"
                     : "/group-avatar.png"
                 }
                 alt={`${selectedConversation?._id}'s avatar`}
@@ -27,7 +35,7 @@ const MessagesHeader = () => {
           <div>
             <h3 className="font-medium">
               {selectedConversation?.type === "Direct"
-                ? selectedConversation?.participants[0]?.username
+                ? findOtherParticipants(selectedConversation.participants)[0]?.username
                 : selectedConversation?.participants
                     .map((p) => p.username)
                     .join(", ")}
