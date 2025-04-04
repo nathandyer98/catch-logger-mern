@@ -190,6 +190,4 @@ export const useCatchStore = create<CatchState>((set) => ({
             toast.error(error.response.data.message);
         }
     },
-
-
 }));

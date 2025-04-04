@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { axiosInstance } from "../services/api-client";
-
 import { Participant } from "../types/users";
 import { Conversation } from "../types/conversations";
+
 import toast from "react-hot-toast";
 
 interface ConversationState {
     conversations: Conversation[];
+    conversationCount: number;
 
     selectedConversation: Conversation | null;
 
@@ -17,10 +18,14 @@ interface ConversationState {
     createConversation: (participants: Participant[]) => Promise<void>;
     setSelectedConversation: (conversationId: string) => void;
     deleteConversation: (conversationId: string) => Promise<void>;
+
+    updateConversationsArray: (conversation: Conversation) => void;
+    updateConversationCount: (count: number) => void;
 }
 
 export const useConversationStore = create<ConversationState>((set, get) => ({
     conversations: [],
+    conversationCount: 0,
     selectedConversation: null,
 
     isFetchingConversations: false,
@@ -52,7 +57,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
                 conversationToSelect = res.data;
 
                 set(state => ({ conversations: state.conversations.map(c => c._id === res.data._id ? res.data : c) }));
-                toast.success("Opened existing chat.");
+                toast.success("Opening Chat.");
             } else {
                 set((state) => ({ conversations: [...state.conversations, res.data] }))
                 conversationToSelect = res.data;
@@ -75,13 +80,25 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
     deleteConversation: async (conversationId: string) => {
         try {
             const res = await axiosInstance.delete(`/conversations/${conversationId}`);
-            const conservationToRemove = res.data.conversationId;
-            set(state => ({ conversations: state.conversations.filter(c => c._id !== conservationToRemove) }));
+            set(state => ({ conversations: state.conversations.filter(c => c._id !== conversationId) }));
             toast.success(res.data.message);
         } catch (error) {
             console.log("Error in deleteConversation: " + error);
             toast.error("Error deleting conversation");
         }
+    },
+
+    updateConversationsArray: (conversation: Conversation) => {
+        set(state => {
+            const conversationExists = state.conversations.some(c => c._id === conversation._id);
+            if (conversationExists) {
+                return { conversations: state.conversations.map(c => c._id === conversation._id ? conversation : c) };
+            } else {
+                return { conversations: [conversation, ...state.conversations] };
+            }
+        });
+    },
+    updateConversationCount: (count: number) => {
+        set({ conversationCount: count });
     }
 }));
-

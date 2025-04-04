@@ -4,14 +4,10 @@ import { axiosInstance } from "../services/api-client";
 import { User } from "../types/users";
 import { SignupFormData, LoginFormData, UpdateProfileData } from "../types/forms";
 import toast from "react-hot-toast";
-import { io, Socket } from "socket.io-client";
-import { useNotificationStore } from "./useNotificationStore";
-
-const BASE_URL = "http://localhost:5001/"
+import { useSocketStore } from "./useSocketStore";
 
 interface AuthState {
     authenticatedUser: User | null;
-    socket: Socket | null;
 
     isSigningUp: boolean;
     isLoggingIn: boolean;
@@ -23,15 +19,10 @@ interface AuthState {
     logout: () => Promise<void>;
     login: (formData: LoginFormData) => Promise<void>;
     updateProfile: (data: UpdateProfileData) => Promise<void>;
-
-    //Socket Connection Functions
-    connectSocket: () => void;
-    disconnectSocket: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
     authenticatedUser: null,
-    socket: null,
 
     isSigningUp: false,
     isLoggingIn: false,
@@ -42,7 +33,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             const res = await axiosInstance.get("/auth/check");
             set({ authenticatedUser: res.data });
-            get().connectSocket();
         } catch (error: any) {
             console.log("Error in checkAuth controller", error);
             set({ authenticatedUser: null });
@@ -56,7 +46,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             const res = await axiosInstance.post("/auth/signup", formData);
             set({ authenticatedUser: res.data });
-            get().connectSocket();
+            useSocketStore.getState().connect(res.data._id);
             toast.success("Account created successfully");
         } catch (error: any) {
             console.log("Error in signup controller", error);
@@ -71,7 +61,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             const res = await axiosInstance.post("/auth/login", formData);
             set({ authenticatedUser: res.data });
-            get().connectSocket();
             toast.success("Logged in successfully");
         } catch (error: any) {
             console.log("Error in login controller", error);
@@ -85,7 +74,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             await axiosInstance.post("/auth/logout");
             set({ authenticatedUser: null });
-            get().disconnectSocket();
+            useSocketStore.getState().disconnect();
             toast.success("Logged out successfully");
         } catch (error: any) {
             console.log("Error in logout controller", error);
@@ -105,43 +94,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } finally {
             set({ isUpdatingProfile: false });
         }
-    },
-
-    connectSocket: () => {
-        const { authenticatedUser } = get();
-        if (!authenticatedUser || get().socket?.connected) return;
-
-        const socket = io(BASE_URL, {
-            auth: {
-                userId: authenticatedUser._id
-            },
-            reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
-        });
-
-        socket.on("connect", () => {
-            console.log("AuthStore: Socket connected");
-            set({ socket: socket });
-
-            useNotificationStore.getState().subscribeToNotifications();
-        });
-
-        socket.on("disconnect", (reason) => {
-            console.log("AuthStore: Socket disconnected", reason);
-
-            useNotificationStore.getState().unsubscribeFromNotifications();
-            set({ socket: null });
-        })
-    },
-    disconnectSocket: () => {
-        const socket = get().socket;
-
-        if (socket?.connected) {
-            console.log("AuthStore: Disconnecting socket");
-            useNotificationStore.getState().unsubscribeFromNotifications();
-            socket.disconnect();
-        }
-        set({ socket: null });
     },
 }));

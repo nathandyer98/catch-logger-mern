@@ -9,11 +9,13 @@ interface MessageState {
 
     getMessages: (conversationId: string) => Promise<void>;
     sendMessage: (conversationId: string, messageData: MessageData) => Promise<void>;
+    updateMessagesArray: (message: Message) => void;
 }
+
 
 export const useMessageStore = create<MessageState>((set) => ({
     messages: [],
-    conversationId: null,
+    messagesCount: 0,
 
     isMessagesLoading: false,
 
@@ -39,5 +41,9 @@ export const useMessageStore = create<MessageState>((set) => ({
         }
     },
 
+    updateMessagesArray: (message: Message) => {
+        set((state) => ({
+            messages: [...state.messages, message],
+        }));
+    },
 }));
-

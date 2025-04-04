@@ -53,6 +53,9 @@ const MessagesContainer = () => {
     );
 }
 
+// make messages editable
+// allow users to click profilePicture to navigate to profile
+
 interface MessageBubble {
   id: string;
   fromAuthenticatedUser: boolean;

@@ -9,10 +9,8 @@ interface ParticipantState {
 
     isSearchingUsers: boolean;
 
-
     searchUsers: (username: string) => Promise<void>;
     setSearchedUsers: (users: Participant[]) => void;
-
     setSelectedUsers: (user: Participant[]) => void;
 }
 
@@ -41,7 +39,4 @@ export const useParticipantStore = create<ParticipantState>((set) => ({
     setSelectedUsers: (user: Participant[]) => {
         set({ selectedUsers: user });
     },
-
 }));
-
-

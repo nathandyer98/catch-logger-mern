@@ -1,10 +1,29 @@
+import { useEffect } from "react";
 import MessagesContainer from "../components/MessagesContainer";
 import MessagesSideBar from "../components/MessagesSideBar";
 import NoMessageContainer from "../components/NoMessageContainer";
 import { useConversationStore } from "../store/useConversationStore";
+import { useSocketStore } from "../store/useSocketStore";
 
 const MessagesPage = () => {
   const { selectedConversation } = useConversationStore();
+  const { joinConversation, leaveConversation } = useSocketStore()
+
+  useEffect(() => {
+    let didConnect = false; 
+    if (selectedConversation) {
+      joinConversation(selectedConversation._id);
+      didConnect = true;
+    }
+
+    return () => {
+      if (selectedConversation && didConnect) {
+        console.log('Cleanup: Calling leaveConversation...');
+        leaveConversation(selectedConversation._id);
+      }
+    };
+  }, [joinConversation, leaveConversation, selectedConversation]);
+
   return (
     <div className="h-full w-full flex flex-col">
 

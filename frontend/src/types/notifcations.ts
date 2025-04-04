@@ -8,5 +8,3 @@ export interface Notification {
     read: boolean;
     createdAt: Date;
 }
-export type NotificationHandler = (notification: Notification) => void;
-export type NotificationCountHandler = (count: number) => void;
