@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { io, Socket } from "socket.io-client";
-import { axiosInstance } from "../services/api-client";
 import { useNotificationStore } from "./useNotificationStore";
 import { useConversationStore } from "./useConversationStore";
 import { useMessageStore } from "./useMessageStore";
@@ -23,6 +22,7 @@ interface SocketState {
     disconnectNotificationCount: () => void;
     joinConversation: (conversationId: string) => void;
     leaveConversation: (conversationId: string) => void;
+    readMessage: (conversationId: string, messageId: string) => void;
 }
 
 export const useSocketStore = create<SocketState>((set, get) => {
@@ -51,15 +51,11 @@ export const useSocketStore = create<SocketState>((set, get) => {
         useMessageStore.getState().updateMessagesArray(message);
 
         //Update incoming messages readBy when in the same conversation
-        try {
-            await axiosInstance.post(`/conversations/${message.conversationId}/messages/${[message._id]}/read`);
-        } catch (error) {
-            console.error("Error in handleNewMessage:", error);
-        }
+        useSocketStore.getState().readMessage(message.conversationId, message._id);
     }
 
     const handleUnreadMessagesCount: MessageCountHandler = ({ conversationId, unreadMessagesCount }) => {
-        console.log('Handler: New message count received:', unreadMessagesCount);
+        console.log(`Handler: New message count received:${unreadMessagesCount} for conversation: ${conversationId}`);
         useConversationStore.getState().updateUnreadMessagesCount(conversationId, unreadMessagesCount);
     }
 
@@ -153,5 +149,21 @@ export const useSocketStore = create<SocketState>((set, get) => {
                 console.warn(`Socket not connected or conversationId is missing. Cannot leave room ${conversationId}.`);
             }
         },
+
+        readMessage: (conversationId: string, messageId: string) => {
+            const socket = get().socket;
+            if (socket?.connected && conversationId && messageId) {
+                socket.emit("markMessageRead", { conversationId, messageId }, (response: { success: boolean; error?: string }) => {
+                    if (response.success) {
+                        console.log("Message marked as read successfully.");
+                    } else {
+                        console.error("Failed to mark message as read:", response.error);
+                    }
+                });
+                console.log(`Client Emitting: readMessage for conversation: ${conversationId} and message: ${messageId}`);
+            } else {
+                console.warn(`Socket not connected or conversationId or messageId is missing. `);
+            }
+        }
     };
 });

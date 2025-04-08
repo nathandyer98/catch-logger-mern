@@ -1,5 +1,6 @@
 import MessageRepository from "../repository/message.repository.js";
 import * as ConversationService from "./conversation.service.js";
+import { SocketService } from "../services/socket.service.js";
 import cloudinary from "../lib/cloudinary.js";
 import {
     ServiceError,
@@ -26,12 +27,31 @@ export const getMessagesForAConversation = async (conversationId, userId) => {
     }
 }
 
-export const readMessages = async (conversationId, userId, messageIds) => {
+export const readMessage = async (conversationId, userId, messageId) => {
     await ConversationService.authoriseAndValidateConversation(conversationId, userId);
     try {
-        await MessageRepository.markMessagesAsRead(messageIds, userId);
+        const message = await MessageRepository.findMessageById(conversationId, messageId);
+        if (!message) throw new NotFoundError("Message not found.");
+        try {
+            await MessageRepository.markMessageAsRead(messageId, userId);
+
+            // Calculate and Emit the newly updated unread count
+            try {
+                const newUnreadCount = await MessageRepository.getUnreadMessagesCount(conversationId, userId);
+                await SocketService.notifyUserOfUnreadMessagesCountInConversation(conversationId, userId, newUnreadCount);
+            } catch (countError) {
+                console.error(`Error calculating/emitting unread count after marking read for User ${userId} in Conv ${conversationId}:`, countError);
+            }
+
+        } catch (error) {
+            console.log("Error in readMessages: " + error);
+            throw new ServiceError("Failed to mark messages as read due to a service issue.");
+        }
     } catch (error) {
         console.log("Error in readMessages: " + error);
+        if (error instanceof NotFoundError) {
+            throw error;
+        }
         throw new ServiceError("Failed to mark messages as read due to a service issue.");
     }
 }
@@ -76,7 +96,7 @@ export const sendMessage = async (conversationId, userId, messageData) => {
     }
 }
 
-export const authoriseAndValidateMessage = async (conversationID, messageId, userId) => {
+export const authoriseAndValidateMessageOwner = async (conversationID, messageId, userId) => {
     try {
         const message = await MessageRepository.findMessageById(messageId, conversationID);
         if (!message) throw new NotFoundError("Message not found.");
@@ -92,7 +112,7 @@ export const authoriseAndValidateMessage = async (conversationID, messageId, use
 }
 
 export const editMessage = async (conversationId, messageId, userId, messageData) => {
-    const message = await authoriseAndValidateMessage(conversationId, messageId, userId);
+    const message = await authoriseAndValidateMessageOwner(conversationId, messageId, userId);
     const { text, image } = messageData;
     const updatePayload = {}
 
@@ -132,7 +152,7 @@ export const editMessage = async (conversationId, messageId, userId, messageData
 }
 
 export const deleteMessage = async (messageId, userId) => {
-    const message = await authoriseAndValidateMessage(messageId, userId);
+    const message = await authoriseAndValidateMessageOwner(messageId, userId);
     try {
         await MessageRepository.deleteMessageById(messageId);
         if (message.image) {

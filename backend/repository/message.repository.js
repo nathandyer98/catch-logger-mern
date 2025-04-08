@@ -28,7 +28,17 @@ class MessageRepository {
      * @returns {Promise<void>} - A promise that resolves when the message is updated.
      */
     async markMessagesAsRead(messagesId, userId) {
-        return Message.updateMany({ _id: { $in: messagesId } }, { $addToSet: { readBy: [userId] } });
+        return Message.updateMany({ _id: { $in: messagesId } }, { $addToSet: { readBy: [userId] } }, { new: true });
+    }
+
+    /**
+     * Add User to readyBy field for a message by ID
+     * @param {string} messageId - The ID of the message
+     * @param {string} userId - The ID of the user
+     * @returns {Promise<void>} - A promise that resolves when the message is updated.
+     */
+    async markMessageAsRead(messageId, userId) {
+        return Message.findByIdAndUpdate(messageId, { $addToSet: { readBy: [userId] } }, { new: true });
     }
 
     /**
@@ -38,7 +48,7 @@ class MessageRepository {
      * @returns {Promise<void>} - A promise that resolves when the message is updated.
      */
     async markAllMessagesAsRead(conversationId, userId) {
-        return Message.updateMany({ conversationId }, { $addToSet: { readBy: [userId] } });
+        return Message.updateMany({ conversationId }, { $addToSet: { readBy: [userId] } }, { new: true });
     }
 
     /**

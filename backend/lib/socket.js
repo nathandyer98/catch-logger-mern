@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import http from "http";
 import express from "express";
 import * as ConversationService from "../services/conversation.service.js";
+import * as MessageService from "../services/message.service.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -61,6 +62,21 @@ io.on("connection", async (socket) => {
 
     socket.on("disconnect", (reason) => {
         console.log(`User ${userId} disconnected socket ${socket.id}. Reason: ${reason}`);
+    });
+
+
+    socket.on('markMessageRead', async ({ conversationId, messageId }, response) => {
+        if (!conversationId || !messageId) {
+            console.warn(`Socket ${socket.id} (User ${userId}) tried to mark message read without conversationId or messageId.`);
+            return;
+        }
+        try {
+            await MessageService.readMessage(conversationId, userId, messageId);
+            response({ success: true });
+        } catch (error) {
+            console.error(`Error while marking message read for conversation ${conversationId} and message ${messageId} for user ${userId}:`, error);
+            response({ success: false, error: `Failed to mark message as read` });
+        }
     });
 })
 

@@ -67,7 +67,6 @@ export const initializeRealtimeListeners = () => {
     })
 
     eventBus.on('message:created', async ({ message }) => {
-        console.log(message);
         if (!message || !message.conversationId) {
             console.error("RealtimeListener: Received invalid message:created event data.");
             return;

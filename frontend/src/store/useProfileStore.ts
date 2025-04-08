@@ -48,7 +48,6 @@ export const useProfileStore = create<ProfileState>((set) => ({
                 isFollowing: false
             }));
             set({ suggestedUsers: suggestedUsersWithIsFollowing });
-            console.log(suggestedUsersWithIsFollowing);
         } catch (error) {
             console.log("Error in fetchSuggestedUsers controller", error);
         } finally {
