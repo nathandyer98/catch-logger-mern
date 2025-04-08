@@ -1,6 +1,7 @@
 import { Heart, MessageCircle, Settings, User, XIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNotificationStore } from "../store/useNotificationStore";
+import { useSocketStore }  from "../store/useSocketStore";
 import { useEffect } from "react";
 
 const NotificationPage = () => {
@@ -12,10 +13,13 @@ const NotificationPage = () => {
     fetchNotifications,
   } = useNotificationStore();
 
-  useEffect(() => {
-    fetchNotifications();
 
-  }, [fetchNotifications]);
+  useEffect(() => {
+    const { disconnectNotificationCount } = useSocketStore.getState();
+
+    fetchNotifications();
+    disconnectNotificationCount();
+  }, [fetchNotifications ]);
 
   const handleDeleteAllNotifications = () => {
     deleteAllNotifications();

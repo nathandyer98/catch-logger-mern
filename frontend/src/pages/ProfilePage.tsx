@@ -7,8 +7,7 @@ import { useCatchStore } from "../store/useCatchStore";
 import { useAuthStore } from "../store/useAuthStore";
 
 const ProfilePage = () => {
-  const { selectedUser, isLoading, fetchProfile, followUnfollowUser } =
-    useProfileStore();
+  const { selectedUser, isLoading, fetchProfile, followUnfollowUser } = useProfileStore();
   const { userCatches, isFetchingCatches, fetchUserCatches } = useCatchStore();
   const { authenticatedUser } = useAuthStore();
   const { username } = useParams();

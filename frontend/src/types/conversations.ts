@@ -7,6 +7,7 @@ export interface Conversation {
     participants: Participant[];
     lastMessage: LastMessage | null;
     lastMessageAt: Date | null;
+    unreadMessagesCount: number;
 }
 
 export interface LastMessage {
@@ -18,7 +19,7 @@ export interface LastMessage {
 
 export interface Message {
     _id: string;
-    conservationId: string;
+    conversationId: string;
     from: string;
     text: string;
     image: string;

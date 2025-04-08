@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useMessageStore } from '../store/useMessageStore';
 import { useConversationStore } from '../store/useConversationStore';
 import { useAuthStore } from '../store/useAuthStore';
@@ -13,7 +13,7 @@ const MessagesContainer = () => {
     const { messages, getMessages, isMessagesLoading } = useMessageStore();
     const { selectedConversation } = useConversationStore();
     const { authenticatedUser } = useAuthStore();
-    // const messageEndRef = useRef(null);
+    const messageEndRef = useRef<HTMLDivElement | null>(null);
 
     const isMessageFromAuthenticatedUser = (message: Message) => {
         return message.from === authenticatedUser?._id;
@@ -30,6 +30,10 @@ const MessagesContainer = () => {
         }
     }, [selectedConversation?._id,getMessages,]);
 
+    useEffect(() => {
+      if (messages) messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
     return (
       <div className="flex flex-col h-full">
         <MessagesHeader />
@@ -40,13 +44,14 @@ const MessagesContainer = () => {
             ) : (
               messages.map((message) => (
                 <MessageBubble
-                  fromAuthenticatedUser={isMessageFromAuthenticatedUser(message)}
                   key={message._id}
+                  fromAuthenticatedUser={isMessageFromAuthenticatedUser(message)}
                   id={message._id}
                   messageText={message.text}
                   messageimage={message.image}
                   createdAt={message.createdAt}
                   from={getUserData(message.from) || null}/>)))}
+          <div ref={messageEndRef} />
         </div>
         <MessageInput />
       </div>
@@ -67,7 +72,7 @@ interface MessageBubble {
 
 const MessageBubble: React.FC<MessageBubble> = ({ id, fromAuthenticatedUser, messageText, messageimage, createdAt, from }: MessageBubble) => {
   return (
-    <div className={`chat  ${fromAuthenticatedUser? "chat-end" : "chat-start"} `} key={id}>
+    <div className={`chat  ${fromAuthenticatedUser? "chat-end" : "chat-start"} `} key={id+messageText}>
       <div className="chat-image avatar">
         <div className="size-10 rounded-full border">
           <img src={from?.profilePic || "/avatar.png"} alt="profile pic" />

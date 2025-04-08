@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { io, Socket } from "socket.io-client";
+import { axiosInstance } from "../services/api-client";
 import { useNotificationStore } from "./useNotificationStore";
 import { useConversationStore } from "./useConversationStore";
 import { useMessageStore } from "./useMessageStore";
@@ -13,12 +14,13 @@ export type NotificationCountHandler = (count: number) => void;
 export type ConversationHandler = (conversation: Conversation) => void;
 export type ConversationCountHandler = (count: number) => void;
 export type MessageHandler = (message: Message) => void;
-export type MessageCountHandler = (count: number) => void;
+export type MessageCountHandler = (data: { conversationId: string; unreadMessagesCount: number }) => void;
 
 interface SocketState {
     socket: Socket | null;
     connect: (userId: string) => void;
     disconnect: () => void;
+    disconnectNotificationCount: () => void;
     joinConversation: (conversationId: string) => void;
     leaveConversation: (conversationId: string) => void;
 }
@@ -31,6 +33,7 @@ export const useSocketStore = create<SocketState>((set, get) => {
 
     const handleNewNotificationCount: NotificationCountHandler = (count: number) => {
         console.log('Handler: New notification count received:', count);
+        useNotificationStore.getState().setNotificationCount(count);
     }
 
     const handleNewConversation: ConversationHandler = (conversation: Conversation) => {
@@ -43,10 +46,21 @@ export const useSocketStore = create<SocketState>((set, get) => {
         useConversationStore.getState().updateConversationsArray(conversation);
     }
 
-
-    const handleNewMessage: MessageHandler = (message: Message) => {
+    const handleNewMessage: MessageHandler = async (message: Message) => {
         console.log('Handler: New message received:', message);
         useMessageStore.getState().updateMessagesArray(message);
+
+        //Update incoming messages readBy when in the same conversation
+        try {
+            await axiosInstance.post(`/conversations/${message.conversationId}/messages/${[message._id]}/read`);
+        } catch (error) {
+            console.error("Error in handleNewMessage:", error);
+        }
+    }
+
+    const handleUnreadMessagesCount: MessageCountHandler = ({ conversationId, unreadMessagesCount }) => {
+        console.log('Handler: New message count received:', unreadMessagesCount);
+        useConversationStore.getState().updateUnreadMessagesCount(conversationId, unreadMessagesCount);
     }
 
     return {
@@ -84,11 +98,13 @@ export const useSocketStore = create<SocketState>((set, get) => {
 
             newSocket.on("newNotification", handleNewNotification);
 
-            newSocket.on("newNotificationCount", handleNewNotificationCount);
+            newSocket.on("updatedNotificationCount", handleNewNotificationCount);
 
             newSocket.on("newGroupConversation", handleNewConversation);
 
             newSocket.on("updatedConversation", handleUpdatedConversation);
+
+            newSocket.on("updatedUnreadMessagesCount", handleUnreadMessagesCount);
 
             newSocket.on("newMessage", handleNewMessage);
 
@@ -105,6 +121,16 @@ export const useSocketStore = create<SocketState>((set, get) => {
                 socket!.off("newMessage", handleNewMessage);
                 get().socket?.disconnect();
                 set({ socket: null });
+            }
+        },
+
+        disconnectNotificationCount: () => {
+            const socket = get().socket;
+            if (socket?.connected) {
+                console.log("Disconnecting notification count listener...");
+                socket.off("updatedNotificationCount", handleNewNotificationCount);
+            } else {
+                console.warn("Socket not connected. Cannot disconnect notification count.");
             }
         },
 

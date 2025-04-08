@@ -185,7 +185,6 @@ class ConversationRepository {
     async getConversationFields(conversationId, fields) {
         return Conversation.findById(conversationId).select(fields).lean();
     }
-
 }
 
 export default new ConversationRepository();

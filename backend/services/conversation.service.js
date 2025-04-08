@@ -1,12 +1,21 @@
 import ConversationRepository from "../repository/conversation.repository.js";
 import UserRepository from "../repository/user.repository.js";
+import MessageRepository from "../repository/message.repository.js";
 import { AuthenticationError, NotFoundError, ServiceError } from '../errors/applicationErrors.js';
 import eventBus from "../src/eventBus.js";
 
 export const getAllConversationsForUser = async (userId) => {
     try {
         const conversations = await ConversationRepository.getConversations(userId);
-        return conversations;
+        const conversationsWithUnreadMessagesCount = await Promise.all(conversations.map(async (conversation) => {
+            const unreadMessagesCount = await MessageRepository.getUnreadMessagesCount(conversation._id, userId);
+            return {
+                ...conversation,
+                unreadMessagesCount: unreadMessagesCount
+            }
+        }));
+
+        return conversationsWithUnreadMessagesCount;
     } catch (error) {
         console.log("Error fetching conversations in repository:", error);
         throw new ServiceError("Failed to fetch conversations due to a service issue.");

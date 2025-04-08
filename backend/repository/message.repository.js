@@ -18,7 +18,7 @@ class MessageRepository {
      * @returns {Promise<number>} - The number of unread messages for the user in the conversation.
      */
     async getUnreadMessagesCount(conversationId, userId) {
-        return Message.countDocuments({ conversationId, readyBy: { $ne: userId } });
+        return Message.countDocuments({ conversationId, readBy: { $nin: [userId] } });
     }
 
     /**
@@ -28,7 +28,7 @@ class MessageRepository {
      * @returns {Promise<void>} - A promise that resolves when the message is updated.
      */
     async markMessagesAsRead(messagesId, userId) {
-        return Message.updateMany({ _id: { $in: messagesId } }, { $addToSet: { readyBy: userId } });
+        return Message.updateMany({ _id: { $in: messagesId } }, { $addToSet: { readBy: [userId] } });
     }
 
     /**
@@ -38,7 +38,7 @@ class MessageRepository {
      * @returns {Promise<void>} - A promise that resolves when the message is updated.
      */
     async markAllMessagesAsRead(conversationId, userId) {
-        return Message.updateMany({ conversationId }, { $addToSet: { readyBy: userId } });
+        return Message.updateMany({ conversationId }, { $addToSet: { readBy: [userId] } });
     }
 
     /**
@@ -51,6 +51,35 @@ class MessageRepository {
         await newMessage.save();
         const messageObject = newMessage.toObject();
         return messageObject;
+    }
+
+    /**
+     * Delete a message by ID
+     * @param {string} messageId - The ID of the message to delete
+     * @returns {Promise<void>} - A promise that resolves when the message is deleted
+     */
+    async deleteMessageById(messageId) {
+        return Message.findByIdAndDelete(messageId);
+    }
+
+    /**
+     * Edit a message by ID
+     * @param {string} messageId - The ID of the message to edit
+     * @param {object} updateData - The data to update the message with
+     * @returns {Promise<object>} - The updated message object as a plain object
+     */
+    async editMessageById(messageId, updateData) {
+        return Message.findByIdAndUpdate(messageId, updateData, { new: true, runValidators: true }).lean();
+    }
+
+    /**
+     * Find a message by ID and conversation ID
+     * @param {string} conversationId - The ID of the conversation
+     * @param {string} messageId - The ID of the message to find
+     * @returns {Promise<object>} - The message object as a plain object
+     */
+    async findMessageById(conversationId, messageId) {
+        return Message.findOne({ _id: messageId, conversationId }).lean();
     }
 }
 

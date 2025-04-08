@@ -23,8 +23,8 @@ export const SocketService = {
             ioInstance.to(userRoom).emit('newNotification', notificationData);
             console.log(`SocketService: Emitted newNotification ${notificationData?._id} to user ${userId}`);
 
-            ioInstance.to(userRoom).emit('updateNotificationCount', unreadNotificationCount);
-            console.log(`SocketService: Emitted updateNotificationCount (${unreadNotificationCount}) to user ${userId}`);
+            ioInstance.to(userRoom).emit('updatedNotificationCount', unreadNotificationCount);
+            console.log(`SocketService: Emitted updatedNotificationCount (${unreadNotificationCount}) to user ${userId}`);
 
         } catch (error) {
             console.error(`SocketService: Error emitting notification updates for user ${userId}:`, error);
@@ -73,5 +73,18 @@ export const SocketService = {
         } catch (error) {
             console.error(`SocketService: Error emitting newMessage for conversation ${conversationId}:`, error);
         }
-    }
+    },
+
+    notifyUserOfUnreadMessagesCountInConversation: async (conversationId, participantId, unreadMessagesCount) => {
+        if (!ioInstance) return console.error("SocketService: IO not initialized.");
+        if (!conversationId || !participantId || typeof unreadMessagesCount === 'undefined') {
+            throw new ServiceError(`SocketService: Invalid data received. Conversation: ${conversationId}, Participant: ${participantId}, Count: ${unreadMessagesCount}`);
+        }
+        try {
+            ioInstance.to(participantId).emit('updatedUnreadMessagesCount', { conversationId, unreadMessagesCount });
+            console.log(`SocketService: Emitted updatedUnreadMessagesCount (${conversationId}, ${unreadMessagesCount}) to user ${participantId}`);
+        } catch (error) {
+            console.error(`SocketService: Error emitting updatedUnreadMessagesCount for user ${participantId}:`, error);
+        }
+    },
 };

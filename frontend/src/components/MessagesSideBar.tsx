@@ -84,6 +84,7 @@ const MessagesSideBar = () => {
                 name={getDisplayName(conversation)}
                 conversationImage={getDisplayImage(conversation)}
                 lastMessage={conversation.lastMessage ?? null}
+                unreadCount={conversation.unreadMessagesCount}
                 isSelected={selectedConversation?._id === conversation._id}
                 handleSelect={handleSelectConversation}
                 handleDelete={handleDeleteConversation}/>)))}
@@ -98,12 +99,13 @@ interface ConversationItemsProps {
   name: string;
   conversationImage: string;
   lastMessage: LastMessage | null;
+  unreadCount: number;
   isSelected: boolean;
   handleSelect: (conversationId: string) => void;
   handleDelete: (id: string) => void;
 }
 
-const ConversationItems: React.FC<ConversationItemsProps> = ({ id, name, conversationImage, lastMessage, isSelected, handleSelect, handleDelete }) => {
+const ConversationItems: React.FC<ConversationItemsProps> = ({ id, name, conversationImage, lastMessage, unreadCount, isSelected, handleSelect, handleDelete }) => {
 
   const onDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -112,7 +114,12 @@ const ConversationItems: React.FC<ConversationItemsProps> = ({ id, name, convers
 
   return (
     <div className={`flex items-center justify-between w-full p-2 rounded-xl transition-colors duration-200 cursor-pointer ${isSelected ? 'bg-transparent/35' : 'bg-transparent/15 hover:bg-transparent/25'}`} onClick={() => handleSelect(id)}>
-      <div className="flex items-center min-w-0 flex-grow mr-2">
+      <div className="flex items-center min-w-0 flex-grow mr-2 relative">
+      <div className="absolute -top-[10px] -left-[6px] z-10">
+            {unreadCount > 0 && <span className="bg-gray-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] inline-block text-center">
+              {unreadCount}
+            </span>}
+          </div>
         <div className="relative mr-3 flex-shrink-0">
           <img
             className="w-10 h-10 rounded-full object-cover"

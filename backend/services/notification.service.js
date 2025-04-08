@@ -62,7 +62,7 @@ export const createNotification = async (notificationData) => {
 
     const isRecipientTheSameAsSender = notificationData.from.toString() === notificationData.to.toString();
     if (isRecipientTheSameAsSender) {
-        throw new ServiceError("Sender and recipient cannot be the same.");
+        return null;
     }
 
     try {

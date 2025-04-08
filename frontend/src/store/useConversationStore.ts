@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 
 interface ConversationState {
     conversations: Conversation[];
-    conversationCount: number;
 
     selectedConversation: Conversation | null;
 
@@ -20,7 +19,8 @@ interface ConversationState {
     deleteConversation: (conversationId: string) => Promise<void>;
 
     updateConversationsArray: (conversation: Conversation) => void;
-    updateConversationCount: (count: number) => void;
+    updateUnreadMessagesCount: (conversationId: string, count: number) => void;
+    getTotalConversationsWithUnreadMessages: () => number;
 }
 
 export const useConversationStore = create<ConversationState>((set, get) => ({
@@ -73,8 +73,15 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
             set({ isCreatingConversation: false });
         }
     },
+
     setSelectedConversation: (conversationId: string) => {
-        set({ selectedConversation: get().conversations.find(c => c._id === conversationId) });
+        const foundConversation = get().conversations.find(c => c._id === conversationId);
+        set({ selectedConversation: foundConversation });
+        if (foundConversation) {
+            set(state => ({
+                conversations: state.conversations.map(c => c._id === conversationId ? { ...c, unreadMessagesCount: 0 } : c)
+            }));
+        }
     },
 
     deleteConversation: async (conversationId: string) => {
@@ -98,7 +105,21 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
             }
         });
     },
-    updateConversationCount: (count: number) => {
-        set({ conversationCount: count });
+
+    updateUnreadMessagesCount: (conversationId: string, count: number) => {
+        const isSelectedConversation = get().selectedConversation?._id === conversationId;
+        set(state => {
+            return {
+                conversations: state.conversations.map((c) => {
+                    if (isSelectedConversation && c._id === conversationId) return c;
+                    return c._id === conversationId ? { ...c, unreadMessagesCount: count } : c
+                })
+            };
+        });
+    },
+
+    getTotalConversationsWithUnreadMessages: () => {
+        const conversations = get().conversations.filter(c => c.unreadMessagesCount > 0);
+        return conversations.length;
     }
 }));

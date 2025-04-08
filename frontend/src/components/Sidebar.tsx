@@ -2,18 +2,15 @@ import { Bell, Home, MessageSquare, Settings, User, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useNotificationStore } from "../store/useNotificationStore";
-import { useEffect } from "react";
+import { useConversationStore } from "../store/useConversationStore";
+import React from "react";
 
 const Sidebar = () => {
   const { authenticatedUser } = useAuthStore();
 
-  const { notificationsCount, getNotificationsCount } = useNotificationStore();
+  const { notificationsCount } = useNotificationStore();
 
-  useEffect(() => {
-    getNotificationsCount();
-    const interval = setInterval(getNotificationsCount, 30000);
-    return () => clearInterval(interval);
-  }, [getNotificationsCount]);
+  const totalUnreadMessages = useConversationStore(state => state.getTotalConversationsWithUnreadMessages());
 
   return (
     <div className="">
@@ -31,6 +28,7 @@ const Sidebar = () => {
           label="Messages"
           icon={<MessageSquare size={24} />}
           path="/messages"
+          number={totalUnreadMessages}
         />
         <NavItem
           label="Profile"

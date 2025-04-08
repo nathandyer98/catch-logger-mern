@@ -58,7 +58,7 @@ const App = () => {
         <div className="flex flex-1 gap-10 overflow-hidden">
 
           {/* Sidebar - Left-side fixed */}
-          <div className="w-1/5 flex-shrink-0">
+          <div className="w-1/5 flex-shrink-0"> 
             {authenticatedUser && <Sidebar />}
           </div>
           

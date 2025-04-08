@@ -27,7 +27,7 @@ const conversationSchema = new mongoose.Schema({
         type: Date,
         default: null
     }
-}, {timestamps: true});
+}, { timestamps: true });
 
 const Conversation = mongoose.model("Conversation", conversationSchema);
 

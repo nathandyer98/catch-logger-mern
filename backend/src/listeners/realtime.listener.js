@@ -1,5 +1,6 @@
 import eventBus from '../eventBus.js';
 import NotificationRepository from "../../repository/notification.repository.js";
+import MessageRepository from '../../repository/message.repository.js';
 import { SocketService } from "../../services/socket.service.js";
 import { NotFoundError } from '../../errors/applicationErrors.js';
 
@@ -36,7 +37,7 @@ export const initializeRealtimeListeners = () => {
         } catch (error) {
             console.error(`RealtimeListener: Error processing conversation:created event for Conversation ${conversationId}:`, error);
         }
-    })
+    });
 
     eventBus.on('conversation:updated', async ({ conversation }) => {
         if (!conversation || !conversation._id) {
@@ -45,10 +46,22 @@ export const initializeRealtimeListeners = () => {
         }
         const conversationId = conversation._id.toString();
         const participantIds = conversation.participants.map(participant => participant._id.toString());
+        const senderId = conversation.lastMessage.from._id.toString();
         try {
+            //Emit the updated conversation  recieved to all participants
             await SocketService.notifyConversationUpdate(participantIds, conversation);
-        }
-        catch (error) {
+
+            //Emit the unread message count to all participants except the sender
+            const recipientIds = participantIds.filter(pid => pid !== senderId);
+            for (const recipientId of recipientIds) {
+                try {
+                    const unreadMessageCount = await MessageRepository.getUnreadMessagesCount(conversationId, recipientId);
+                    await SocketService.notifyUserOfUnreadMessagesCountInConversation(conversationId, recipientId, unreadMessageCount);
+                } catch (error) {
+                    console.error(`RealtimeListener: Error getting/sending unread count for User ${recipientId} in Conv ${conversationId}:`, error);
+                }
+            }
+        } catch (error) {
             console.error(`RealtimeListener: Error processing conversation:updated event for Conversation ${conversationId}:`, error);
         }
     })

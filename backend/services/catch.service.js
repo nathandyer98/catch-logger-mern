@@ -1,6 +1,5 @@
 import CatchRepository from "../repository/catch.repository.js";
 import UserRepository from "../repository/user.repository.js";
-import NotificationRepository from "../repository/notification.repository.js";
 import * as NotificationService from "./notification.service.js";
 import cloudinary from "../lib/cloudinary.js";
 import {
@@ -79,6 +78,13 @@ export const updateCatch = async (catchId, userId, updateData) => {
     let photoUrl = null;
     if (updateData.photo) {
         try {
+            if (catchToUpdate.photo) {
+                try {
+                    await cloudinary.uploader.destroy(catchToUpdate.photo.split('/').pop().split('.')[0]);
+                } catch (error) {
+                    console.warn("Cloudinary delete failed:", deletedResponse);
+                }
+            }
             const uploadedResponse = await cloudinary.uploader.upload(updateData.photo, { folder: "messages" });
             photoUrl = uploadedResponse.secure_url;
         } catch (uploadError) {
