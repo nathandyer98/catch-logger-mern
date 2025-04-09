@@ -1,6 +1,6 @@
 export interface Comment {
     _id: string;
-    user: {_id: string, username: string, fullName: string, profilePic?: string};
+    user: { _id: string, username: string, fullName: string, profilePic?: string };
     text: string;
     createdAt: Date;
     updatedAt: Date;
@@ -12,7 +12,7 @@ export interface Catch {
     weight: number;
     lake: string;
     dateCaught: Date;
-    photo?: string;
+    photo: string;
     rig?: string;
     bait?: string;
     distance?: number;
@@ -22,5 +22,5 @@ export interface Catch {
     comments: Comment[];
     createdAt: Date;
     updatedAt: Date;
-    user: {_id: string, username: string, fullName: string, profilePic?: string};
+    user: { _id: string, username: string, fullName: string, profilePic?: string };
 }

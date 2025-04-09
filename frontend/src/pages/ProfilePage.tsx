@@ -1,19 +1,30 @@
 import { useEffect, useState } from "react";
 import { Fish, MapPin, Trophy } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { useProfileStore } from "../store/useProfileStore";
 import { useCatchStore } from "../store/useCatchStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { useConversationStore } from "../store/useConversationStore";
+import ProfilePostWidget from "../components/ProfilePostWidget";
+import PostWidget from "../components/PostWidget";
+import { Catch } from "../types/catches";
 
 const ProfilePage = () => {
   const { selectedUser, isLoading, fetchProfile, followUnfollowUser } = useProfileStore();
-  const { userCatches, isFetchingCatches, fetchUserCatches } = useCatchStore();
+  const { catches, isFetchingCatches, fetchUserCatches } = useCatchStore();
   const { authenticatedUser } = useAuthStore();
+  const { createConversation } = useConversationStore();
   const { username } = useParams();
 
   const [showStats, setShowStats] = useState(false); //CLICKING PROFILE PIC REVEALS STATS
+  const [selectedCatch, setSelectedCatch] = useState<Catch | null>(null); 
   const isCurrentUser = selectedUser?._id === authenticatedUser?._id;
+
+  let isFollowing;
+  if(!isCurrentUser) {
+    isFollowing = selectedUser?.followers.includes(authenticatedUser!._id);
+  }
 
   useEffect(() => {
     if (username) {
@@ -30,40 +41,40 @@ const ProfilePage = () => {
 
   return (
     <>
-      {isLoading ? (
+      {isLoading && !selectedUser ? (
         <div>Loading...</div>
       ) : (
-        <div className="py-6 flex justify-center items-center transition-all duration-500">
+        <div className="py-6 flex justify-center items-center transition-all duration-500" >
           {/* Stats Slider*/}
-          <div
+          <div onClick={() => setShowStats(!showStats)}
             className={`absolute transition-transform-reverse duration-500 
         ${
           showStats
-            ? " opacity-100 brightness-100  translate-x-full "
+            ? " opacity-100 brightness-100  translate-x-1/3 "
             : "opacity-0 brightness-0 translate-x-1/4"
         }`}
           >
-            <h3 className="text-xl font-semibold mb-4">Personal Stats</h3>
+            <h3 className="text-xl text-white font-semibold mb-4">Personal Stats</h3>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-100 p-3 rounded">
+              <div className="bg-gray-100 p-3 rounded font-medium text-gray-700">
                 <Trophy className="inline mr-2" />
                 Total Fish: 0
               </div>
-              <div className="bg-gray-100 p-3 rounded">
+              <div className="bg-gray-100 p-3 rounded font-medium text-gray-700">
                 <Fish className="inline mr-2" />
                 Personal Best: 0 kg
               </div>
-              <div className="bg-gray-100 p-3 rounded">
+              <div className="bg-gray-100 p-3 rounded font-medium text-gray-700">
                 <MapPin className="inline mr-2" />
                 Favourite Lake:
               </div>
-              <div className="bg-gray-100 p-3 rounded">Favourite Hookbait:</div>
+              <div className="bg-gray-100 p-3 rounded font-medium text-gray-700">Favourite Hookbait:</div>
             </div>
           </div>
 
           {/* Profile Pic */}
           <div
-            className={`text-center transition-transform-reverse duration-500 ${
+            className={`w-1/3 text-center transition-transform-reverse duration-500 ${
               showStats ? "-translate-x-full " : "-translate-x-0 "
             }`}
           >
@@ -73,34 +84,43 @@ const ProfilePage = () => {
               alt="Profile"
               className="w-32 h-32 rounded-full object-cover mx-auto mb-4"
             />
-            <h2 className="text-2xl font-bold">{selectedUser?.fullName}</h2>
+            <h2 className="text-2xl text-white font-bold">{selectedUser?.fullName}</h2>
 
             <div className="flex justify-center space-x-4 mt-2">
               <div>Followers: {selectedUser?.followers.length}</div>
               <div>Following: {selectedUser?.following.length}</div>
             </div>
             {!isCurrentUser && (
-              <div className="grid grid-cols-2 gap-3 justify-center mt-2 ">
+              <div className="flex gap-3 justify-center mt-2">
                 <button
-                  className="col-span-1  py-2 text-white rounded bg-blue-600 hover:bg-blue-900 transition"
+                  className={`flex-auto w-1/4 py-2 btn btn-circle text-lg ${ isFollowing
+                      ? " bg-blue-500 text-white hover:bg-blue-500/90 "
+                      : "bg-white text-black  hover:bg-white hover:opacity-90"
+                  }`}
                   onClick={() => handleFollowUnfollow()}
                 >
-                  Follow/Unfollow
+                  {isFollowing ? "Following" : "Follow"}
                 </button>
-
+                  <Link to={`/messages`}
+                  className={"flex-auto w-1/4 py-2 btn btn-circle text-lg bg-blue-500 text-white hover:bg-blue-500/90"}>
                 <button
-                  className=" col-span-1  py-2 text-white rounded bg-blue-600 hover:bg-blue-900 transition"
-                  onClick={() => console.log("Message button clicked")} // Replace with actual logic
+                  onClick={() => createConversation([{
+                    _id: selectedUser!._id,
+                    username: selectedUser!.username,
+                    fullName: selectedUser!.fullName,
+                    profilePic: selectedUser!.profilePic,
+                  }])} 
                 >
                   Message
                 </button>
+                </Link>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Catch Filters ---PROVISIONAL--- */}
+      {/* Catch Filters ---PROVISIONAL---
       <div className="mt">
         <h3 className="text-xl font-semibold mb-4">Catch Filters</h3>
         <div className="flex space-x-4 mb-4">
@@ -125,26 +145,26 @@ const ProfilePage = () => {
             <option value="Bass">Bass</option>
           </select>
         </div>
-      </div>
+      </div> */}
 
       {/* My Catches ----NEED TO IMPLEMENT----*/}
-      {isFetchingCatches ? (
-        <div>Loading...</div>
-      ) : (
-        <div className="mt-6">
-          <h3 className="text-xl font-semibold mb-4">My Catches</h3>
-          {userCatches?.length ? (
-            userCatches.map((catchItem) => (
-              <div key={catchItem._id} className="catch-card">
-                {/* Render each catch card */}
-                <p>{catchItem.species}</p>
-              </div>
-            ))
-          ) : (
-            <p>No catches yet.</p>
-          )}
+      {isFetchingCatches ? (<div>Loading...</div>) : (
+        <div className='w-full flex flex-wrap'>
+        {catches && catches.map((catchData) => (
+            <div key={catchData._id} className="lg:w-1/3 p-1" onClick={() => setSelectedCatch(catchData)}>
+              <ProfilePostWidget catchData={catchData} />
+            </div>
+        ))}
+        {isFetchingCatches && <div>Loading...</div>}
+    </div>)}
+    {selectedCatch && <div className="w-full h-full absolute top-0 left-0 bg-black/50" onClick={() => setSelectedCatch(null)} >
+      <div className="w-full h-full flex justify-center items-center ">
+        <div className="bg-black/80 rounded-lg shadow-lg" onClick={(e => e.stopPropagation())}>
+          <PostWidget catchData={selectedCatch!} /> 
         </div>
-      )}
+        </div>
+    </div>}
+
     </>
   );
 };

@@ -9,9 +9,11 @@ interface CatchState {
     // feed will contain all catches that the user follows + their catches
     // user catches will display catches strictly from a user
     // explore will contain a random selection of catches
-    exploreCatches: Catch[] | null;
-    feedCatches: Catch[] | null;
-    userCatches: Catch[] | null;
+    // exploreCatches: Catch[] | null;
+    // catches: Catch[] | null;
+    // userCatches: Catch[] | null;
+
+    catches: Catch[] | null;
 
     isAddingCatch: boolean;
     isFetchingCatches: boolean;
@@ -33,9 +35,7 @@ interface CatchState {
 }
 
 export const useCatchStore = create<CatchState>((set) => ({
-    feedCatches: null,
-    userCatches: null,
-    exploreCatches: null,
+    catches: null,
 
     isAddingCatch: false,
     isFetchingCatches: false,
@@ -47,7 +47,7 @@ export const useCatchStore = create<CatchState>((set) => ({
         set({ isFetchingCatches: true });
         try {
             const res = await axiosInstance.get("/catches/");
-            set({ exploreCatches: res.data });
+            set({ catches: res.data });
         } catch (error: any) {
             console.log("Error in fetchCatches controller", error);
             toast.error(error.response.data.message);
@@ -60,7 +60,7 @@ export const useCatchStore = create<CatchState>((set) => ({
         set({ isFetchingCatches: true });
         try {
             const res = await axiosInstance.get("/catches/feed");
-            set({ feedCatches: res.data });
+            set({ catches: res.data });
         } catch (error: any) {
             console.log("Error in fetchCatches controller", error);
             toast.error(error.response.data.message);
@@ -73,7 +73,7 @@ export const useCatchStore = create<CatchState>((set) => ({
         set({ isFetchingCatches: true });
         try {
             const res = await axiosInstance.get(`/catches/user/${username}`);
-            set({ userCatches: res.data });
+            set({ catches: res.data });
         } catch (error: any) {
             console.log("Error in fetchCatches controller", error);
             toast.error(error.response.data.message);
@@ -88,7 +88,7 @@ export const useCatchStore = create<CatchState>((set) => ({
             toast.success("Catch added successfully");
             const newCatch = res.data;
             set((state) => ({
-                feedCatches: [newCatch, ...(state.feedCatches || [])],
+                catches: [newCatch, ...(state.catches || [])],
             }));
         } catch (error: any) {
             console.log("Error in add catch controller", error);
@@ -103,7 +103,7 @@ export const useCatchStore = create<CatchState>((set) => ({
             await axiosInstance.delete(`/catches/${id}`);
 
             set((state) => ({
-                feedCatches: state.feedCatches?.filter((catchPost) => catchPost._id !== id),
+                catches: state.catches?.filter((catchPost) => catchPost._id !== id),
             }));
 
             toast.success("Catch deleted successfully");
@@ -117,7 +117,7 @@ export const useCatchStore = create<CatchState>((set) => ({
         try {
             const { data } = await axiosInstance.post(`/catches/${id}/like`);
             set((state) => ({
-                feedCatches: state.feedCatches?.map((catchPost) => {
+                catches: state.catches?.map((catchPost) => {
                     if (catchPost._id === id) {
                         catchPost.likes = data.catchLikes;
                         console.log(catchPost);
@@ -136,7 +136,7 @@ export const useCatchStore = create<CatchState>((set) => ({
         try {
             const { data } = await axiosInstance.post(`/catches/${id}/comments`, { text });
             set((state) => ({
-                feedCatches: state.feedCatches?.map((catchPost) => {
+                catches: state.catches?.map((catchPost) => {
                     if (catchPost._id === id) {
                         catchPost.comments = data;
                     }
@@ -157,7 +157,7 @@ export const useCatchStore = create<CatchState>((set) => ({
         try {
             const { data } = await axiosInstance.put(`/catches/${id}/comments/${commentId}`, { text });
             set((state) => ({
-                feedCatches: state.feedCatches?.map((catchPost) => {
+                catches: state.catches?.map((catchPost) => {
                     if (catchPost._id === id) {
                         catchPost.comments = data;
                     }
@@ -177,7 +177,7 @@ export const useCatchStore = create<CatchState>((set) => ({
         try {
             await axiosInstance.delete(`/catches/${id}/comments/${commentId}`);
             set((state) => ({
-                feedCatches: state.feedCatches?.map((catchPost) => {
+                catches: state.catches?.map((catchPost) => {
                     if (catchPost._id === id) {
                         catchPost.comments = catchPost.comments.filter((comment) => comment._id !== commentId);
                     }
