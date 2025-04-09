@@ -13,9 +13,10 @@ import { Toaster } from "react-hot-toast";
 import Sidebar from "./components/Sidebar";
 import ProfilePage from "./pages/ProfilePage";
 import NotificationPage from "./pages/NotificationPage";
-import SuggestedUsers from "./components/SuggestedUsers";
+import SuggestedUsersContainer from "./components/SuggestedUsersContainer";
 import MessagesPage from "./pages/MessagesPage";
 import { useSocketStore } from "./store/useSocketStore";
+import "react-image-crop/dist/ReactCrop.css";
 
 const App = () => {
   const { authenticatedUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -110,7 +111,7 @@ const App = () => {
           
           {/* Suggested Users - Right-side fixed */}
           <div className="w-1/5 flex-shrink-0">
-            {authenticatedUser && <SuggestedUsers />}
+            {authenticatedUser && <SuggestedUsersContainer />}
           </div>
         </div>
         
