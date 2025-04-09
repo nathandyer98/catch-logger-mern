@@ -13,7 +13,6 @@ import { app, server, io } from "../lib/socket.js";
 import { connectDB } from "../lib/db.js";
 import { SocketService } from '../services/socket.service.js';
 import { initializeRealtimeListeners } from './listeners/realtime.listener.js';
-import eventBus from './eventBus.js';
 
 dotenv.config();
 SocketService.initialize(io);
@@ -34,7 +33,15 @@ app.use("/api/users", userRoute);
 app.use("/api/notifications", notificationRoute);
 app.use("/api/conversations", converstaionRoute)
 
-server.listen(PORT, () => {
-    console.log("Server is running on port:", PORT);
-    connectDB();
-})
+if (process.env.NODE_ENV !== "test") {
+    server.listen(PORT, () => {
+        console.log("Server is running on port:", PORT);
+        connectDB();
+    })
+} else {
+    console.log("Test environment detected. Server is not started.");
+}
+
+
+export { app, server, io };
+
