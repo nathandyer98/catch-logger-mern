@@ -526,10 +526,7 @@ describe('GET /api/auth/check', () => {
 
 });
 
-// Add this describe block to your existing auth test file
-// Assumes previous setup (imports, beforeAll, afterAll, beforeEach clearing User, etc.)
-// Assumes TEST_EMAIL, TEST_PASSWORD, User model are available
-
+// Test Suite for Update Profile Endpoint
 describe('PUT /api/auth/update-profile', () => {
     let agent; // Agent for authenticated requests
     let testUser; // Store created user info
