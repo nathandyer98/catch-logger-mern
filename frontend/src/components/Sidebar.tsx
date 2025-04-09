@@ -1,4 +1,4 @@
-import { Bell, Home, MessageSquare, Settings, User, Users } from "lucide-react";
+import { Bell, Home, MessageSquare, Settings, User } from "lucide-react"; //Users 
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useNotificationStore } from "../store/useNotificationStore";
@@ -17,7 +17,7 @@ const Sidebar = () => {
       {/* Navigation Links */}
       <nav className="flex flex-col rounded-2xl w-auto">
         <NavItem label="Home" icon={<Home size={24} />} path="/" />
-        <NavItem label="Groups" icon={<Users size={24} />} path="/" />
+        {/* <NavItem label="Groups" icon={<Users size={24} />} path="/" />  // REMOVED FOR NOW*/}
         <NavItem
           label="Notifications"
           icon={<Bell size={24} />}
