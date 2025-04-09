@@ -34,28 +34,13 @@ const CreatePostWidget = () => {
     if (!formData.species.trim()) return toast.error("Species is required");
     if (!formData.weight) return toast.error("Weight is required");
     if (!formData.lake.trim()) return toast.error("Lake is required");
-
     return true;
   };
-
-  // const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (!file) return;
-
-  //   const reader = new FileReader();
-  //   reader.readAsDataURL(file);
-  //   reader.onload = async () => {
-  //     const base64Image = reader.result as string;
-  //     setSelectedImg(base64Image);
-  //     setFormData({ ...formData, photo: base64Image });
-  //   };
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const success = validateForm();
-
     if (success === true) {
       console.log("form data", formData);
       await addCatch(formData);
@@ -227,13 +212,6 @@ const CreatePostWidget = () => {
                 className="flex justify-start items-center ml-4 h-9 w-9 cursor-pointer"
               >
                 <Camera className="w-5 h-5" onClick={()=> setImageModalOpen(true)}/>
-                {/* <input
-                  type="file"
-                  id="avatar-upload"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                /> */}
               </label>
               <label
                 htmlFor="expand"
