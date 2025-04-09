@@ -76,7 +76,7 @@ export const loginUser = async (email, password) => {
 export const updateUserProfile = async (userId, updatePayload) => {
     const { fullName, profilePic } = updatePayload;
 
-    const user = UserRepository.findByIdMongooseDoc(userId);
+    const user = await UserRepository.findByIdMongooseDoc(userId);
     if (!user) {
         throw new NotFoundError("User not found");
     }
@@ -91,7 +91,9 @@ export const updateUserProfile = async (userId, updatePayload) => {
         try {
             if (user.profilePic) {
                 try {
-                    await cloudinary.uploader.destroy(user.profilePic.split('/').pop().split('.')[0]);
+                    console.log(user.profilePic.split('/').pop().split('.')[0])
+                    const deletedResponse = await cloudinary.uploader.destroy(`user_profiles/${user.profilePic.split('/').pop().split('.')[0]}`);
+                    console.log("Cloudinary delete successful:", deletedResponse);
                 } catch (error) {
                     console.warn("Cloudinary delete failed:", deletedResponse);
                 }
@@ -107,6 +109,7 @@ export const updateUserProfile = async (userId, updatePayload) => {
         throw new UserInputError("No valid data provided for update");
     }
     try {
+        console.log("Fields to update:", fieldsToUpdate);
         const updatedUser = await UserRepository.updateUserById(userId, fieldsToUpdate);
         if (!updatedUser) {
             throw new NotFoundError("User not found during update operation.");

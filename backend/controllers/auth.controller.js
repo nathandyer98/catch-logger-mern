@@ -5,7 +5,7 @@ import { generateToken } from "../utils/generateToken.js";
 export const signup = async (req, res) => {
     const { fullName, email, password, username } = req.body;
 
-    if (!fullName.trim() || !username.trim() || !email.trim() || !password.trim()) {
+    if (!fullName || !username || !email || !password || !fullName.trim() || !username.trim() || !email.trim() || !password.trim()) {
         return res.status(400).json({ message: "All fields are required" });
     }
     if (password.length < 8) {
@@ -25,7 +25,7 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
     const { email, password } = req.body;
 
-    if (!email.trim() || !password.trim()) {
+    if (!email || !password || !email.trim() || !password.trim()) {
         return res.status(400).json({ message: "Email and Password are required" });
     }
     try {
