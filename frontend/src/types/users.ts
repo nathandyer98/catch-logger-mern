@@ -10,8 +10,8 @@ export interface User {
 }
 
 export interface UserProfile extends User {
-    followers: [];
-    following: [];
+    followers: string[];
+    following: string[];
 }
 
 export interface SuggestedUser {
