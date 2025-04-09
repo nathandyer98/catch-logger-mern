@@ -28,12 +28,16 @@ export const signUpUser = async (userData) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    // const verficationToken = Math.floor(100000 + Math.random() * 900000).toString();
+    // const verficationTokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
     const newUserInput = {
         fullName,
         username: usernameLower,
         email: emailLower,
         password: hashedPassword,
+        // verficationToken,
+        // verficationTokenExpiry
     };
 
     try {
