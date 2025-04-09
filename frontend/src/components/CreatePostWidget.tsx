@@ -5,6 +5,7 @@ import { useState } from "react";
 import { CatchFormData } from "../types/forms";
 import toast from "react-hot-toast";
 import { useCatchStore } from "../store/useCatchStore";
+import UploadImageModal from "./UploadImageModal.tsx";
 
 const defaultFormData: CatchFormData = {
   species: "" as FishSpecies,
@@ -24,6 +25,7 @@ const CreatePostWidget = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedImg, setSelectedImg] = useState<string | null>(null);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
 
   const { authenticatedUser } = useAuthStore();
   const { addCatch, isAddingCatch } = useCatchStore();
@@ -36,18 +38,18 @@ const CreatePostWidget = () => {
     return true;
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async () => {
-      const base64Image = reader.result as string;
-      setSelectedImg(base64Image);
-      setFormData({ ...formData, photo: base64Image });
-    };
-  };
+  //   const reader = new FileReader();
+  //   reader.readAsDataURL(file);
+  //   reader.onload = async () => {
+  //     const base64Image = reader.result as string;
+  //     setSelectedImg(base64Image);
+  //     setFormData({ ...formData, photo: base64Image });
+  //   };
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,10 +64,21 @@ const CreatePostWidget = () => {
     }
   };
 
+  const handleCropData = (imageUrl: string) => {
+    setSelectedImg(imageUrl);
+    setFormData({ ...formData, photo: imageUrl });
+    setImageModalOpen(false);
+  }
+
   return (
+    <>
+    {imageModalOpen && (
+      <UploadImageModal closeModal={() => setImageModalOpen(false)} onCropComplete={handleCropData} />
+      
+    )}
     <div className="relative max-w-full mx-auto bg-primary/15 rounded-2xl shadow-sm mb-6">
       {isAddingCatch && (
-        <div className="absolute rounded-2xl top-0 left-0 w-full h-full flex items-center justify-center z-10">
+        <div className="absolute bg-black/30 rounded-2xl top-0 left-0 w-full h-full flex items-center justify-center z-10">
           <Loader className="animate-spin text-primary" />
         </div>
       )}
@@ -213,14 +226,14 @@ const CreatePostWidget = () => {
                 htmlFor="avatar-upload"
                 className="flex justify-start items-center ml-4 h-9 w-9 cursor-pointer"
               >
-                <Camera className="w-5 h-5" />
-                <input
+                <Camera className="w-5 h-5" onClick={()=> setImageModalOpen(true)}/>
+                {/* <input
                   type="file"
                   id="avatar-upload"
                   className="hidden"
                   accept="image/*"
                   onChange={handleImageUpload}
-                />
+                /> */}
               </label>
               <label
                 htmlFor="expand"
@@ -245,7 +258,7 @@ const CreatePostWidget = () => {
         )}
       </form>
     </div>
-  );
+    </>);
 };
 
 export default CreatePostWidget;
