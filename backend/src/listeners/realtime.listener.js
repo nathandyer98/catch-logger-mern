@@ -45,10 +45,11 @@ export const initializeRealtimeListeners = () => {
             return;
         }
         const conversationId = conversation._id.toString();
-        const participantIds = conversation.participants.map(participant => participant._id.toString());
+        const participantIds = conversation.accessedBy.map(participant => participant._id.toString());
+        console.log("Participant IDs:", participantIds);
         const senderId = conversation.lastMessage.from._id.toString();
         try {
-            //Emit the updated conversation  recieved to all participants
+            //Emit the updated conversation recieved to all participants
             await SocketService.notifyConversationUpdate(participantIds, conversation);
 
             //Emit the unread message count to all participants except the sender

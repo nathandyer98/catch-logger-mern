@@ -5,6 +5,7 @@ export interface Conversation {
     _id: string;
     type: ConversationTypes;
     participants: Participant[];
+    accessedBy: string[];
     lastMessage: LastMessage | null;
     lastMessageAt: Date | null;
     unreadMessagesCount: number;

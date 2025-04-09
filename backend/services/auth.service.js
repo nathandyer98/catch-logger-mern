@@ -40,7 +40,7 @@ export const signUpUser = async (userData) => {
         const user = await UserRepository.createUser(newUserInput);
         return user;
     } catch (error) {
-        console.log("Error creating user in repository:", error);
+        console.error("Error creating user in repository:", error);
         throw new ServiceError(error.message);
     };
 }

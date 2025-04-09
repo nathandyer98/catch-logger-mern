@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
 import UserRepository from "../repository/user.repository.js";
 
 export const authenticatedRoute = async (req, res, next) => {

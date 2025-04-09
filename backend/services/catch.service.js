@@ -20,7 +20,6 @@ export const getAllCatches = async ({ page, limit }) => {
 
 export const getCatchesByUser = async (username, { page, limit }) => {
     const user = await UserRepository.findByUsername(username);
-    console.log(user)
     if (!user) throw new NotFoundError("User not found.");
     try {
         const catches = await CatchRepository.getCatchesById(user._id, page, limit);

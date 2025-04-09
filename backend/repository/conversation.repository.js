@@ -11,17 +11,16 @@ class ConversationRepository {
 
     /**
      * Get all conversations for a user. 
-     * (A group conversation where the user is a participant, or a direct conversation where the user is accessedBy)
+     * (All conversations where the user is accessedBy)
      * @param {string} userId - The ID of the user
-     * @returns {Promise<Array<object>} - A sorted array at of plain conversation objects (excluding accessedBy by default)
+     * @returns {Promise<Array<object>} - A sorted array at of plain conversation objects 
      * Sorted on the the most recent last message or updated at
      * Contains the conversation details, including the all the participants's fullname, username and profile picture 
      * And the last message details, including the user's fullname, username and profile picture or null if there is no last message
      * Returns an empty array ([]) if no conversations are foundf for the user.
      */
     async getConversations(userId) {
-        return Conversation.find({ $or: [{ type: "Group", participants: userId }, { type: "Direct", accessedBy: userId }] })
-            .select("-accessedBy")
+        return Conversation.find({ accessedBy: userId })
             .populate(this.participantPopulate)
             .populate(this.lastMessagePopulate)
             .sort({ lastMessageAt: -1, updatedAt: -1 })
@@ -31,14 +30,13 @@ class ConversationRepository {
     /**
      * Get a conversation by ID
      * @param {string} conversationId - The ID of the conversation
-     * @returns {Promise<object>} - A plain conversation object (excluding accessedBy by default)
+     * @returns {Promise<object>} - A plain conversation object 
      * Contains the conversation details, including the all the participants's fullname, username and profile picture 
      * And the last message details, including the user's fullname, username and profile picture or null if there is no last message
      * Returns null if no conversation is found for the ID.
      */
     async getConversationById(conversationId) {
         return Conversation.findById(conversationId)
-            .select("-accessedBy")
             .populate(this.participantPopulate)
             .populate(this.lastMessagePopulate)
             .lean();
@@ -48,7 +46,7 @@ class ConversationRepository {
      * Create a direct conversation
      * @param {string} user1Id - The ID of the first user
      * @param {string} user2Id - The ID of the second user
-     * @returns {Promise<object>} - The new conversation object as a plain object. (excluding accessedBy by default)
+     * @returns {Promise<object>} - The new conversation object as a plain object. 
      * Contains the conversation details, including the all the participants's fullname, username and profile picture 
      */
     async createDirectConversation(user1Id, user2Id) {
@@ -65,11 +63,11 @@ class ConversationRepository {
     /**
      * Create a group conversation
      * @param {Array<string>} participants - The IDs of the participants
-     * @returns {Promise<object>} - The new conversation object as a plain object (excluding accessedBy by default)
+     * @returns {Promise<object>} - The new conversation object as a plain object 
      * Contains the conversation details, including the all the participants's fullname, username and profile picture
      */
     async createGroupConversation(participants) {
-        const conversation = new Conversation({ type: "Group", participants });
+        const conversation = new Conversation({ type: "Group", participants, accessedBy: participants });
         await conversation.save()
         const populatedConversation = this.getConversationById(conversation._id);
         return populatedConversation
@@ -99,13 +97,12 @@ class ConversationRepository {
      * Find exisiting direct conversation between the users
      * @param {string} user1Id - The ID of the first user
      * @param {string} user2Id - The ID of the second user
-     * @returns {Promise<object>} - A plain conversation object (excluding accessedBy by default)
+     * @returns {Promise<object>} - A plain conversation object 
      * Contains the conversation details, including the user's fullname, username and profile picture 
      * And the last message details, including the user's fullname, username and profile picture or null if there is no last message
      */
     async findDirectConversation(user1Id, user2Id) {
         return Conversation.findOne({ type: "Direct", participants: { $all: [user1Id, user2Id] } })
-            .select("-accessedBy")
             .populate(this.participantPopulate)
             .populate(this.lastMessagePopulate)
             .lean();
@@ -117,17 +114,17 @@ class ConversationRepository {
      * @param {string} userId - The ID of the user
      * @returns {Promise<object>} - A plain conversation object, but with the user added to accessedBy
      */
-    async addParticipantToDirectConversation(conversationId, userId) {
+    async addParticipantToConversation(conversationId, userId) {
         return Conversation.findByIdAndUpdate(conversationId, { $addToSet: { accessedBy: userId } }, { new: true }).lean();
     }
 
     /**
-     * Remove user from exising direct conversation, so they can no longer see the direct conversation
+     * Remove user from exising conversation, so they can no longer see the conversation.
      * @param {string} conversationId - The ID of the conversation
      * @param {string} userId - The ID of the user
      * @returns {Promise<object>} - A plain conversation object, but with the user removed from accessedBy
      */
-    async removeParticipantFromDirectConversation(conversationId, userId) {
+    async removeParticipantFromConversation(conversationId, userId) {
         return Conversation.findByIdAndUpdate(conversationId, { $pull: { accessedBy: userId } }, { new: true }).lean();
     }
 
@@ -154,7 +151,7 @@ class ConversationRepository {
      * Update a conversation by ID
      * @param {string} conversationId - The ID of the conversation
      * @param {object} updatePayload - The ID of the message
-     * @returns {Promise<object>} - A the updated conversation object as a plain object (excluding accessedBy by default)
+     * @returns {Promise<object>} - A the updated conversation object as a plain object 
      * Contains the conversation details, including the all the participants's fullname, username and profile picture
      * And the last message details, including the user's fullname, username and profile picture or null if there is no last message
      */

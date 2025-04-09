@@ -15,7 +15,7 @@ export const searchUsers = async (currentUserId, usernameQuery) => {
         const users = await UserRepository.findUsersByUsernameQuery(currentUserId, usernameQuery)
         return users
     } catch (error) {
-        console.log("Error searching users in repository: ", error);
+        console.error("Error searching users in repository: ", error);
         throw new ServiceError("Failed to search users due to a service issue.");
     }
 }
@@ -46,7 +46,7 @@ export const followUnfollowUser = async (currentUserId, targetUserId) => {
         }
         return { user, message }
     } catch (error) {
-        console.log("Error following/unfollowing in repository: ", error);
+        console.error("Error following/unfollowing in repository: ", error);
         throw new ServiceError("Failed to follow/unfollow user due to service issue.");
     }
 }
@@ -54,14 +54,15 @@ export const followUnfollowUser = async (currentUserId, targetUserId) => {
 export const getSuggestedUsers = async (userId) => {
     const amount = 4
     try {
-        const followedUsers = await UserRepository.getFollowingList(userId);
+        const follwingList = await UserRepository.getFollowingList(userId);
+        const followedUsers = follwingList.following.map(user => user._id.toString());
         const usersSample = await UserRepository.findOtherUsersSample(userId);
 
         if (!followedUsers) {
             throw new NotFoundError("Current user not found when fetching following list.");
         }
 
-        const filteredUsers = usersSample.filter(user => !followedUsers.following.includes(user._id))
+        const filteredUsers = usersSample.filter(user => !followedUsers.includes(user._id.toString()));
         return filteredUsers.slice(0, amount)
     } catch (error) {
         console.error("Error fetching suggested users in repository:", error);

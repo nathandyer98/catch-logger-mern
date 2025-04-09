@@ -43,7 +43,7 @@ export const createConversation = async (currentUserId, participants) => {
         if (conversationType === "Direct") {
             const existingConversation = await ConversationRepository.findDirectConversation(currentUserId, participants[0]);
             if (existingConversation) {
-                await ConversationRepository.addParticipantToDirectConversation(existingConversation._id, currentUserId);
+                await ConversationRepository.addParticipantToConversation(existingConversation._id, currentUserId);
                 return existingConversation;
             } else {
                 const newConversation = await ConversationRepository.createDirectConversation(currentUserId, participants[0]);
@@ -73,10 +73,10 @@ export const deleteConversation = async (conversationId, userId) => {
 
     try {
         if (conversationToUpdate.type === "Direct") {
-            await ConversationRepository.removeParticipantFromDirectConversation(conversationId, userId);
+            await ConversationRepository.removeParticipantFromConversation(conversationId, userId);
             return "Direct conversation removed successfully";
         } else if (conversationToUpdate.type === "Group" && conversationToUpdate.participants.length > 1) {
-            await ConversationRepository.removeParticipantFromGroupConversation(conversationId, userId);
+            await ConversationRepository.removeParticipantFromConversation(conversationId, userId);
             const updatedConversation = await ConversationRepository.getConversationById(conversationId);
 
             if (updatedConversation) {
