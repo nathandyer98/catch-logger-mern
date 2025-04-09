@@ -39,7 +39,7 @@ const MessagesSideBar = () => {
     if (conversation.type === "Direct") {
       return findOtherParticipants(conversation.participants)[0]?.username;
     } else {
-      return conversation.participants.map((p) => p.username).join(", ");
+      return conversation.participants.map((p) => conversation.accessedBy.includes(p._id) ? p.username : "").join(", ") || "Group Chat";
     }
   };
 

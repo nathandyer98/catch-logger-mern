@@ -36,9 +36,7 @@ const MessagesHeader = () => {
             <h3 className="font-medium">
               {selectedConversation?.type === "Direct"
                 ? findOtherParticipants(selectedConversation.participants)[0]?.username
-                : selectedConversation?.participants
-                    .map((p) => p.username)
-                    .join(", ")}
+                : selectedConversation?.participants.map((p) => selectedConversation.accessedBy.includes(p._id) ? p.username : "").join(", ") || "Group Chat"}
             </h3>
             <p className="text-sm text-base-content/70"></p>
           </div>
