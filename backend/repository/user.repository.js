@@ -95,6 +95,8 @@ class UserRepository {
         await newUser.save();
         const userObject = newUser.toObject();
         delete userObject.password;
+        // delete userObject.verficationToken;
+        // delete userObject.verficationTokenExpiry;
         return userObject;
     }
 
