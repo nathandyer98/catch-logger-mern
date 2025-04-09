@@ -5,7 +5,7 @@ import PostWidget from "../components/PostWidget";
 // import PostWidgetSkeleton from "../components/skeleton/PostWidgetSkeleton";
 
 const HomePage = () => {
-  const { feedCatches, fetchCatchesFeed } = useCatchStore();
+  const { catches, fetchCatchesFeed } = useCatchStore();
 
   useEffect(() => {
     fetchCatchesFeed();
@@ -15,9 +15,9 @@ const HomePage = () => {
     <div className="space-y-6">
       <CreatePostWidget />
       {/* {isFetchingCatches && <PostWidgetSkeleton /> } */}
-      {!feedCatches && <div>No catches found to display here</div>}
-      {feedCatches &&
-        feedCatches.map((catchLog, index) => (
+      {!catches && <div>No catches found to display here</div>}
+      {catches &&
+        catches.map((catchLog, index) => (
           <PostWidget catchData={catchLog} key={index + 1} />
         ))}
     </div>
