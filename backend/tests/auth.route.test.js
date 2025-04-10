@@ -4,11 +4,12 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import bcrypt from 'bcryptjs';
 import { app } from '../src/index.js';
 import User from '../models/user.model.js'; // Adjust the path to your User model
+jest.mock('../lib/cloudinary.js');
 import cloudinary from '../lib/cloudinary.js';
 
 
 let mongoServer;
-jest.mock('../lib/cloudinary.js');
+
 
 //TEST CONSTANTS
 const TEST_EMAIL = 'testuser@example.com';

@@ -32,7 +32,7 @@ export const followUnfollowUser = async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id;
 
-    if (id === userId) {
+    if (id === userId.toString()) {
         return res.status(400).json({ message: "You cannot follow yourself." });
     }
     try {
@@ -48,7 +48,7 @@ export const getSuggestedUsers = async (req, res) => {
     const userId = req.user._id;
     try {
         const users = await UserService.getSuggestedUsers(userId)
-        res.status(200).json({ suggestedUsers: users })
+        res.status(200).json(users)
     } catch (error) {
         console.log("---Get Suggested Users Controller Error---", error);
         handleControllerError(error, res)

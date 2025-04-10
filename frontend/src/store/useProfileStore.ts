@@ -42,8 +42,8 @@ export const useProfileStore = create<ProfileState>((set) => ({
     fetchSuggestedUsers: async () => {
         set({ isFetchingSuggestedUser: true });
         try {
-            const res = await axiosInstance.get("/users/");
-            const suggestedUsersWithIsFollowing = res.data.suggestedUsers.map((user: SuggestedUser) => ({
+            const res = await axiosInstance.get("/users/suggested");
+            const suggestedUsersWithIsFollowing = res.data.map((user: SuggestedUser) => ({
                 ...user,
                 isFollowing: false
             }));
