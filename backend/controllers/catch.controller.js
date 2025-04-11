@@ -1,5 +1,6 @@
 import * as CatchService from "../services/catch.service.js"
 import { handleControllerError } from '../utils/errorHandler.js';
+import { CatchEnum } from "../models/catch.model.js";
 
 export const getAllCatches = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -44,8 +45,12 @@ export const createCatch = async (req, res) => {
   const { species, weight, lake, dateCaught, rig, bait, distance, location, text, photo } = req.body;
   const userId = req.user._id;
 
-  if (!text || !photo || !species || !weight || !dateCaught) {
+  if (!text || !photo || !species || !weight || !dateCaught || !lake) {
     return res.status(400).json({ message: "Some fields are missing" });
+  }
+  console.log(dateCaught, dateCaught instanceof Date, !isNaN(new Date(dateCaught).getTime()))
+  if (!text.trim() || CatchEnum[(species.trim())] !== undefined || !species.trim() || weight <= 0 || isNaN(new Date(dateCaught).getTime()) || !lake.trim() || !photo.trim()) {
+    return res.status(400).json({ message: "Invalid data" });
   }
   try {
     const newCatch = await CatchService.createCatch({ user: userId, species, weight, lake, dateCaught, rig, bait, distance, location, text, photo });

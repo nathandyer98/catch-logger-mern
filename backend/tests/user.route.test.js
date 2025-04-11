@@ -6,6 +6,7 @@ import { user1Fixture, user2Fixture, user3Fixture, user4Fixture } from './fixtur
 import { createLoggedInAgent } from './utils/apiTestAgent.js';
 jest.mock('../lib/cloudinary.js');
 
+
 let mongoServer;
 let agentUser1, agentUser2;
 let user1Object, user2Object, user3Object, user4Object;
@@ -86,7 +87,7 @@ describe('GET /api/users/:username/profile', () => {
 });
 
 //Test Suit for Searching Users
-describe('GET /api/users/search', () => {
+describe('GET /api/users/search?username=', () => {
     it('should return an empty array when no users match the query', async () => {
         const res = await agentUser2.get(`/api/users/search`).query({ username: 'nonexistentuser' });
         expect(res.status).toBe(200);

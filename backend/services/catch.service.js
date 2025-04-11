@@ -26,7 +26,7 @@ export const getCatchesByUser = async (username, { page, limit }) => {
         return catches
     } catch (error) {
         console.log("Error fetching all cathches in repository:", error);
-        throw new ServiceError("Failed to fetch all catches due to a service issue.");
+        throw new ServiceError("Failed to fetch user's catches due to a service issue.");
     }
 }
 
@@ -40,7 +40,7 @@ export const getCatchesFeed = async (userId, { page, limit }) => {
         return catches
     } catch (error) {
         console.log("Error fetching all cathches in repository:", error);
-        throw new ServiceError("Failed to fetch all catches due to a service issue.");
+        throw new ServiceError("Failed to fetch catches feed due to a service issue.");
     }
 }
 
@@ -51,7 +51,7 @@ export const createCatch = async (catchData) => {
     let photoUrl = null;
     if (catchData.photo) {
         try {
-            const uploadedResponse = await cloudinary.uploader.upload(catchData.photo, { folder: "messages" });
+            const uploadedResponse = await cloudinary.uploader.upload(catchData.photo, { folder: "catch_photoes" });
             photoUrl = uploadedResponse.secure_url;
         } catch (uploadError) {
             console.error("Cloudinary upload failed:", uploadError);
@@ -65,7 +65,7 @@ export const createCatch = async (catchData) => {
         return newCatch
     } catch (error) {
         console.log("Error creating catch in repository:", error);
-        throw new ServiceError("Failed to fetch all catches due to a service issue.");
+        throw new ServiceError("Failed to create catch due to a service issue.");
     }
 }
 
@@ -84,7 +84,7 @@ export const updateCatch = async (catchId, userId, updateData) => {
                     console.warn("Cloudinary delete failed:", deletedResponse);
                 }
             }
-            const uploadedResponse = await cloudinary.uploader.upload(updateData.photo, { folder: "messages" });
+            const uploadedResponse = await cloudinary.uploader.upload(updateData.photo, { folder: "catch_photoes" });
             photoUrl = uploadedResponse.secure_url;
         } catch (uploadError) {
             console.error("Cloudinary upload failed:", uploadError);

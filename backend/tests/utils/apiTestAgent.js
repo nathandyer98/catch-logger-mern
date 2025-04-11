@@ -28,3 +28,11 @@ export const createLoggedInAgent = async ({ email, password }) => {
     console.log(`[Agent Helper] Successfully created logged-in agent for ${email}`);
     return agent;
 };
+
+
+/**
+ * Create a Supertest agent that is not logged in.
+ * @returns {request.SuperTest<request.Test>} - A Supertest agent instance without session cookie.
+ * @throws {Error} If agent creation fails.
+ */
+export const createUnloggedInAgent = () => request.agent(app);
