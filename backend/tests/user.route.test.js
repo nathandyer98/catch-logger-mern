@@ -1,59 +1,20 @@
-import request from 'supertest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { app } from '../src/index.js';
 import bcrypt from 'bcryptjs';
-import User from '../models/user.model.js'; // Adjust the path to your User model
+import User from '../models/user.model.js';
+import { user1Fixture, user2Fixture, user3Fixture, user4Fixture } from './fixtures/users.fixture.js';
+import { createLoggedInAgent } from './utils/apiTestAgent.js';
 jest.mock('../lib/cloudinary.js');
 
 let mongoServer;
 let agentUser1, agentUser2;
 let user1Object, user2Object, user3Object, user4Object;
 
-let user1 = {
-    email: 'testuser@example.com',
-    password: 'password123',
-    fullName: 'Test User',
-    username: 'testuser',
-};
-
-let user2 = {
-    email: 'testuser2@example.com',
-    password: 'password123',
-    fullName: 'Test User 2',
-    username: 'testuser2',
-};
-
-let user3 = {
-    email: 'testuser3@example.com',
-    password: 'password123',
-    fullName: 'Test User 3',
-    username: 'testuser3',
-};
-
-let user4 = {
-    email: 'testuser4@example.com',
-    password: 'password123',
-    fullName: 'Test User 4',
-    username: 'testuser4',
-};
-
 
 const hashPassword = async (password = 'password123') => {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
 };
-
-
-const createLoggedinUser = async ({ email, password = "password123" }) => {
-    const agent = request.agent(app);
-    const res = await agent.post('/api/auth/login').send({ email, password });
-    if (res.status !== 200) {
-        console.log(`Failed to login user: ${email}`, res.body);
-        throw new Error(`Failed to login user: ${email} in agent setup`);
-    }
-    return agent;
-}
 
 
 beforeAll(async () => {
@@ -74,10 +35,10 @@ beforeEach(async () => {
     await User.deleteMany({});
 
     const hashedPassword = await hashPassword();
-    const user1Doc = new User({ ...user1, password: hashedPassword });
-    const user2Doc = new User({ ...user2, password: hashedPassword });
-    const user3Doc = new User({ ...user3, password: hashedPassword });
-    const user4Doc = new User({ ...user4, password: hashedPassword });
+    const user1Doc = new User({ ...user1Fixture, password: hashedPassword });
+    const user2Doc = new User({ ...user2Fixture, password: hashedPassword });
+    const user3Doc = new User({ ...user3Fixture, password: hashedPassword });
+    const user4Doc = new User({ ...user4Fixture, password: hashedPassword });
 
     await user1Doc.save();
     await user2Doc.save();
@@ -90,8 +51,8 @@ beforeEach(async () => {
     user4Object = user4Doc.toObject();
 
     try {
-        agentUser1 = await createLoggedinUser(user1);
-        agentUser2 = await createLoggedinUser(user2);
+        agentUser1 = await createLoggedInAgent(user1Fixture);
+        agentUser2 = await createLoggedInAgent(user2Fixture);
     } catch (error) {
         console.error('Error setting up agent users in beforeEach:', error);
         throw error;

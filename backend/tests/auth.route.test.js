@@ -10,38 +10,41 @@ import cloudinary from '../lib/cloudinary.js';
 
 let mongoServer;
 
-
-//TEST CONSTANTS
+// Test Data
 const TEST_EMAIL = 'testuser@example.com';
 const TEST_PASSWORD = 'password123';
 const TEST_SHORT_PASSWORD = 'pass';
 const TEST_USERNAME = 'testuser';
 const TEST_FULLNAME = 'Test User';
 
+// Helper function to create a test user in the database
+const createTestUser = async () => {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(TEST_PASSWORD, salt);
+    const user = await User.create({
+        fullName: TEST_FULLNAME,
+        username: TEST_USERNAME,
+        email: TEST_EMAIL,
+        password: hashedPassword,
+    });
+    return user;
+};
 
-// Jest Hooks for Setup and Teardown
+
 beforeAll(async () => {
-    // Start the in-memory MongoDB server before all tests
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
-    // Connect Mongoose to the in-memory server
-    await mongoose.connect(mongoUri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        // Add any other Mongoose connection options you use
-    });
+    await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log(`MongoDB Memory Server started at ${mongoUri}`);
 });
 
 afterAll(async () => {
-    // Disconnect Mongoose and stop the in-memory server after all tests
     await mongoose.disconnect();
     await mongoServer.stop();
     console.log('MongoDB Memory Server stopped.');
 });
 
 beforeEach(async () => {
-    // Clear the User collection before each test to ensure isolation
     await User.deleteMany({});
 });
 
@@ -49,23 +52,9 @@ beforeEach(async () => {
 // Test Suite for Login Endpoint
 describe('POST /api/auth/login', () => {
 
-    // Helper function to create a user directly in the DB for testing login
-    const createTestUser = async () => {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(TEST_PASSWORD, salt);
-        await User.create({
-            fullName: TEST_FULLNAME,
-            username: TEST_USERNAME,
-            email: TEST_EMAIL,
-            password: hashedPassword,
-        });
-    };
-
     it('should login successfully with correct credentials and return user data and JWT cookie', async () => {
-        // Arrange: Create the user in the database first
         await createTestUser();
 
-        // Act: Send a POST request to the login endpoint
         const response = await request(app)
             .post('/api/auth/login')
             .send({
@@ -73,29 +62,28 @@ describe('POST /api/auth/login', () => {
                 password: TEST_PASSWORD,
             });
 
-        // Assert: Check the response status and body
+        // Assert: Validate the response body    
         expect(response.statusCode).toBe(200);
         expect(response.body).toBeDefined();
-        expect(response.body).toHaveProperty('_id'); // Check for ID
+        expect(response.body).toHaveProperty('_id');
         expect(response.body).toHaveProperty('email', TEST_EMAIL);
         expect(response.body).toHaveProperty('username', TEST_USERNAME);
         expect(response.body).toHaveProperty('fullName', TEST_FULLNAME);
-        expect(response.body).not.toHaveProperty('password'); // IMPORTANT: ensure password is NOT returned
+        expect(response.body).not.toHaveProperty('password');
 
-        // Assert: Check if the JWT cookie was set
-        // Supertest stores cookies in response.headers['set-cookie'] (an array)
+        // Assert: Check the JWT cookie in the response headers
         expect(response.headers['set-cookie']).toBeDefined();
         const jwtCookie = response.headers['set-cookie'].find(cookie => cookie.startsWith('jwt='));
         expect(jwtCookie).toBeDefined();
-        expect(jwtCookie).toContain('HttpOnly'); // Assuming generateToken sets HttpOnly
-        // You could add more checks like Path=/; Max-Age=... if needed
+        expect(jwtCookie).toContain('HttpOnly');
+        expect(jwtCookie).toContain('SameSite=Strict');
+        expect(jwtCookie).toContain('Path=/');
+        expect(jwtCookie).toContain('Max-Age');
     });
 
     it('should return 401 Unauthorized for incorrect password', async () => {
-        // Arrange: Create the user
         await createTestUser();
 
-        // Act
         const response = await request(app)
             .post('/api/auth/login')
             .send({
@@ -103,16 +91,15 @@ describe('POST /api/auth/login', () => {
                 password: 'wrongPassword123', // Incorrect password
             });
 
-        // Assert: Check status code and error message (based on your service/controller logic)
-        expect(response.statusCode).toBe(401); // Assuming AuthenticationError maps to 401
+        expect(response.statusCode).toBe(401);
         expect(response.body).toHaveProperty('message', 'Incorrect Email or Password');
-        expect(response.headers['set-cookie']).toBeUndefined(); // No cookie should be set on failure
+        expect(response.headers['set-cookie']).toBeUndefined();
     });
 
     it('should return 401 Unauthorized if user email does not exist', async () => {
-        // Arrange: No user is created with this email
+        await createTestUser();
 
-        // Act
+        // Act: Attempt to log in with a non-existent email
         const response = await request(app)
             .post('/api/auth/login')
             .send({
@@ -120,17 +107,12 @@ describe('POST /api/auth/login', () => {
                 password: TEST_PASSWORD,
             });
 
-        // Assert
-        expect(response.statusCode).toBe(401); // Assuming AuthenticationError maps to 401
+        expect(response.statusCode).toBe(401);
         expect(response.body).toHaveProperty('message', 'Incorrect Email or Password');
         expect(response.headers['set-cookie']).toBeUndefined();
     });
 
     it('should return 400 Bad Request if password is missing', async () => {
-        // Arrange: Create the user (though not strictly necessary for this validation test)
-        await createTestUser();
-
-        // Act
         const response = await request(app)
             .post('/api/auth/login')
             .send({
@@ -138,14 +120,12 @@ describe('POST /api/auth/login', () => {
                 // password field is missing
             });
 
-        // Assert
         expect(response.statusCode).toBe(400);
         expect(response.body).toHaveProperty('message', 'Email and Password are required');
         expect(response.headers['set-cookie']).toBeUndefined();
     });
 
     it('should return 400 Bad Request if email is missing', async () => {
-        // Act
         const response = await request(app)
             .post('/api/auth/login')
             .send({
@@ -153,14 +133,12 @@ describe('POST /api/auth/login', () => {
                 // email field is missing
             });
 
-        // Assert
         expect(response.statusCode).toBe(400);
         expect(response.body).toHaveProperty('message', 'Email and Password are required');
         expect(response.headers['set-cookie']).toBeUndefined();
     });
 
     it('should return 400 Bad Request if email is empty (whitespace)', async () => {
-        // Act
         const response = await request(app)
             .post('/api/auth/login')
             .send({
@@ -168,14 +146,12 @@ describe('POST /api/auth/login', () => {
                 password: TEST_PASSWORD,
             });
 
-        // Assert
         expect(response.statusCode).toBe(400);
         expect(response.body).toHaveProperty('message', 'Email and Password are required');
         expect(response.headers['set-cookie']).toBeUndefined();
     });
 
     it('should return 400 Bad Request if password is empty (whitespace)', async () => {
-        // Act
         const response = await request(app)
             .post('/api/auth/login')
             .send({
@@ -183,21 +159,17 @@ describe('POST /api/auth/login', () => {
                 password: '   ', // Whitespace password
             });
 
-        // Assert
         expect(response.statusCode).toBe(400);
         expect(response.body).toHaveProperty('message', 'Email and Password are required');
         expect(response.headers['set-cookie']).toBeUndefined();
     });
-
 });
 
 // Test Suite for Sign Up Endpoint
 describe('POST /api/auth/signup', () => {
 
     it('should signup successfully with valid data, return user data (minus password), and set JWT cookie', async () => {
-        // Arrange: Valid data, DB is clean via beforeEach
-
-        // Act
+        // Arrange: Sign up a new user with test data
         const response = await request(app)
             .post('/api/auth/signup')
             .send({
@@ -207,36 +179,43 @@ describe('POST /api/auth/signup', () => {
                 password: TEST_PASSWORD,
             });
 
-        // Assert: Check Response
-        expect(response.statusCode).toBe(201); // 201 Created for successful resource creation
+
+        // Assert: Validate the response body
+        expect(response.statusCode).toBe(201);
         expect(response.body).toBeDefined();
         expect(response.body).toHaveProperty('_id');
         expect(response.body).toHaveProperty('fullName', TEST_FULLNAME);
-        expect(response.body).toHaveProperty('username', TEST_USERNAME.toLowerCase()); // Service converts to lowercase
-        expect(response.body).toHaveProperty('email', TEST_EMAIL.toLowerCase());    // Service converts to lowercase
-        expect(response.body).not.toHaveProperty('password'); // Ensure password is NOT returned
+        expect(response.body).toHaveProperty('username', TEST_USERNAME.toLowerCase());
+        expect(response.body).toHaveProperty('email', TEST_EMAIL.toLowerCase());
+        expect(response.body).not.toHaveProperty('password');
 
-        // Assert: Check JWT Cookie
+        //Assert: Check the JWT cookie in the response headers
         expect(response.headers['set-cookie']).toBeDefined();
         const jwtCookie = response.headers['set-cookie'].find(cookie => cookie.startsWith('jwt='));
         expect(jwtCookie).toBeDefined();
-        expect(jwtCookie).toContain('HttpOnly'); // Assuming this flag is set
+        expect(jwtCookie).toContain('HttpOnly');
+        expect(jwtCookie).toContain('SameSite=Strict');
+        expect(jwtCookie).toContain('Path=/');
+        expect(jwtCookie).toContain('Max-Age');
 
-        // Assert: (Optional but recommended) Check Database directly
-        const dbUser = await User.findOne({ email: TEST_EMAIL.toLowerCase() }).lean(); // Use .lean() for plain object
+        // Assert: Check the database for the new user
+        const dbUser = await User.findOne({ email: TEST_EMAIL.toLowerCase() }).lean();
         expect(dbUser).toBeDefined();
         expect(dbUser).not.toBeNull();
+        expect(dbUser._id).toBeDefined();
         expect(dbUser.username).toBe(TEST_USERNAME.toLowerCase());
-        expect(dbUser.password).toBeDefined(); // Check password exists (it should be hashed)
-        expect(dbUser.password).not.toBe(TEST_PASSWORD); // Ensure it's not the plain password
-        // Check if the stored password is a valid bcrypt hash (optional, more advanced)
-        // const isHash = await bcrypt.compare(TEST_PASSWORD, dbUser.password);
-        // expect(isHash).toBe(true);
+        expect(dbUser.fullName).toBe(TEST_FULLNAME);
+        expect(dbUser.password).toBeDefined();
+        expect(dbUser.password).not.toBe(TEST_PASSWORD);
+
+        // Assert: Check that the password is hashed
+        const isHash = await bcrypt.compare(TEST_PASSWORD, dbUser.password);
+        expect(isHash).toBe(true);
     });
 
     it('should return 409 Conflict if email already exists', async () => {
         // Arrange: Create a user first with the target email
-        await request(app) // Use the signup endpoint itself to create the user easily
+        await request(app)
             .post('/api/auth/signup')
             .send({
                 fullName: "Existing User",
@@ -255,8 +234,7 @@ describe('POST /api/auth/signup', () => {
                 password: TEST_PASSWORD,
             });
 
-        // Assert
-        expect(response.statusCode).toBe(409); // Assuming ConflictError maps to 409
+        expect(response.statusCode).toBe(409);
         expect(response.body).toHaveProperty('message', 'Email already exists');
         expect(response.headers['set-cookie']).toBeUndefined();
     });
@@ -282,16 +260,12 @@ describe('POST /api/auth/signup', () => {
                 password: TEST_PASSWORD,
             });
 
-        // Assert
-        expect(response.statusCode).toBe(409); // Assuming ConflictError maps to 409
+        expect(response.statusCode).toBe(409);
         expect(response.body).toHaveProperty('message', 'Username already taken - please choose another');
         expect(response.headers['set-cookie']).toBeUndefined();
     });
 
     it('should return 400 Bad Request if password is less than 8 characters', async () => {
-        // Arrange: Use a short password
-
-        // Act
         const response = await request(app)
             .post('/api/auth/signup')
             .send({
@@ -301,7 +275,6 @@ describe('POST /api/auth/signup', () => {
                 password: TEST_SHORT_PASSWORD, // Too short
             });
 
-        // Assert
         expect(response.statusCode).toBe(400);
         expect(response.body).toHaveProperty('message', 'Password must be at least 8 characters');
         expect(response.headers['set-cookie']).toBeUndefined();
@@ -351,7 +324,6 @@ describe('POST /api/auth/signup', () => {
 
             // Assert
             expect(response.statusCode).toBe(400);
-            // Your controller checks !field.trim(), so this message is correct
             expect(response.body).toHaveProperty('message', 'All fields are required');
             expect(response.headers['set-cookie']).toBeUndefined();
         }
@@ -382,8 +354,15 @@ describe('POST /api/auth/logout', () => {
 
         // Sanity check login
         expect(loginResponse.statusCode).toBe(200);
+        expect(agent).toBeDefined();
+        expect(agent.jar).toBeDefined();
+
         const loginCookie = loginResponse.headers['set-cookie']?.find(c => c.startsWith('jwt='));
-        expect(loginCookie).toBeDefined(); // Ensure we got a cookie
+        expect(loginCookie).toBeDefined();
+        expect(loginCookie).toContain('HttpOnly');
+        expect(loginCookie).toContain('SameSite=Strict');
+        expect(loginCookie).toContain('Path=/');
+        expect(loginCookie).toContain('Max-Age');
 
         // Act: Call the logout endpoint using the same agent
         const logoutResponse = await agent.post('/api/auth/logout').send(); // No body needed
@@ -408,8 +387,6 @@ describe('POST /api/auth/logout', () => {
     });
 
     it('should return 200 and success message even if called when not logged in', async () => {
-        // Arrange: Use a fresh request instance (not logged in)
-        // Act: Call logout directly
         const response = await request(app).post('/api/auth/logout').send();
 
         // Assert: Should still succeed gracefully
@@ -430,20 +407,15 @@ describe('POST /api/auth/logout', () => {
 describe('GET /api/auth/check', () => {
 
     it('should return 401 Unauthorized if no token/cookie is provided', async () => {
-        // Arrange: No prior login needed
-
         // Act: Make request directly without logging in
         const response = await request(app).get('/api/auth/check');
 
-        // Assert: Expect middleware to block with 401
+        // Assert: Expect middleware to block with 401 
         expect(response.statusCode).toBe(401);
-        // Optionally, check for a specific error message if your middleware provides one
-        // expect(response.body).toHaveProperty('message', 'Unauthorized'); // Example
+        expect(response.body).toHaveProperty('message', 'Unauthorized - No token');
     });
 
     it('should return 401 Unauthorized if an invalid/malformed token/cookie is provided', async () => {
-        // Arrange: No prior login needed
-
         // Act: Make request with a clearly invalid cookie
         const response = await request(app)
             .get('/api/auth/check')
@@ -451,21 +423,13 @@ describe('GET /api/auth/check', () => {
 
         // Assert: Expect middleware to reject the token and return 401
         expect(response.statusCode).toBe(401);
-        // Optionally, check for a specific error message
-        // expect(response.body).toHaveProperty('message', 'Invalid token'); // Example
+        expect(response.body).toHaveProperty('message', 'Unauthorized - Invalid token');
     });
 
     it('should return 200 OK and user data (minus password) if a valid token/cookie is provided', async () => {
-        // Arrange:
+        // Arrange: 
         // 1. Create a user
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(TEST_PASSWORD, salt);
-        const user = await User.create({ // Get the created user ID
-            fullName: TEST_FULLNAME,
-            username: TEST_USERNAME,
-            email: TEST_EMAIL,
-            password: hashedPassword,
-        });
+        const user = await createTestUser();
 
         // 2. Log the user in to get a valid cookie using a Supertest agent
         const agent = request.agent(app); // Create an agent to persist cookies
@@ -486,7 +450,6 @@ describe('GET /api/auth/check', () => {
         const checkResponse = await agent.get('/api/auth/check'); // Agent automatically sends the cookie
 
         // Assert: Check the response from the protected route
-        //console.log(checkResponse.body); // Log the response body for debugging
         expect(checkResponse.statusCode).toBe(200);
         expect(checkResponse.body).toBeDefined();
         expect(checkResponse.body).toHaveProperty('_id', user._id.toString()); // Verify correct user ID
@@ -499,16 +462,9 @@ describe('GET /api/auth/check', () => {
     it('should return 404 Not Found if the user associated with a valid token no longer exists', async () => { // <-- Updated description slightly for clarity
         // Arrange:
         // 1. Create user and log in to get a valid cookie
-        const agent = request.agent(app);
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(TEST_PASSWORD, salt);
-        const user = await User.create({
-            fullName: TEST_FULLNAME,
-            username: TEST_USERNAME,
-            email: TEST_EMAIL,
-            password: hashedPassword,
-        });
+        const user = await createTestUser();
 
+        const agent = request.agent(app);
         const loginResponse = await agent
             .post('/api/auth/login')
             .send({ email: TEST_EMAIL, password: TEST_PASSWORD });
@@ -520,7 +476,6 @@ describe('GET /api/auth/check', () => {
         // Act: Attempt to access the protected route with the now-orphaned cookie
         const checkResponse = await agent.get('/api/auth/check');
 
-        // Assert: Expect middleware to fail finding the user and return 404 (as implemented)
         expect(checkResponse.statusCode).toBe(404);
         expect(checkResponse.body).toHaveProperty('message', 'User associated with this token not found');
     });
@@ -539,15 +494,7 @@ describe('PUT /api/auth/update-profile', () => {
         cloudinary.uploader.destroy.mockClear();
 
         // 1. Create user
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(TEST_PASSWORD, salt);
-        testUser = await User.create({ // Store user data
-            fullName: TEST_FULLNAME,
-            username: TEST_USERNAME,
-            email: TEST_EMAIL,
-            password: hashedPassword,
-            profilePic: '', // Start with no profile pic
-        });
+        testUser = await createTestUser();
 
         // 2. Log in user with agent
         agent = request.agent(app);
@@ -574,14 +521,14 @@ describe('PUT /api/auth/update-profile', () => {
         expect(response.body).toHaveProperty('email', TEST_EMAIL.toLowerCase()); // Ensure other fields remain
         expect(response.body).not.toHaveProperty('password');
 
-        // Assert Database (Optional but good)
+        // Assert Database Update
         const dbUser = await User.findById(testUser._id).lean();
         expect(dbUser.fullName).toBe(newFullName);
     });
 
     it('should update profilePic successfully (using mocked Cloudinary)', async () => {
         // Arrange
-        const mockProfilePicData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA..."; // Example mock data
+        const mockProfilePicData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...";
 
         // Act
         const response = await agent
@@ -626,7 +573,6 @@ describe('PUT /api/auth/update-profile', () => {
 
         // Assert Cloudinary Mock Calls
         expect(cloudinary.uploader.destroy).toHaveBeenCalledTimes(1);
-        // Your service extracts public ID like: user.profilePic.split('/').pop().split('.')[0]
         expect(cloudinary.uploader.destroy).toHaveBeenCalledWith(initialPublicId);
         expect(cloudinary.uploader.upload).toHaveBeenCalledTimes(1);
         expect(cloudinary.uploader.upload).toHaveBeenCalledWith(newProfilePicData, { folder: "user_profiles" });
