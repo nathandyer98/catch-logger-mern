@@ -23,12 +23,12 @@ export interface CatchFormData {
     weight: number;
     lake: string;
     dateCaught: Date;
-    photo?: string;
+    photo: string;
     rig?: string;
     bait?: string;
     distance?: number;
     location?: string;
-    text?: string;
+    text: string;
 }
 
 export interface CommentFormData {

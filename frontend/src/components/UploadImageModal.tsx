@@ -161,7 +161,7 @@ const UploadImageModal = ({ closeModal, onCropComplete }: UploadImageModalProps)
                             </button>
                         </div>
                     {/* Preview Canvas */}
-                    {crop && ( <canvas ref={previewCanvasRef} className="mt-4 display-none " />)}    
+                    {crop && ( <canvas ref={previewCanvasRef} className="absolute z-[-10] mt-4 display-none" />)}    
                     </div>
                 )}
               </div>

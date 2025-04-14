@@ -1,5 +1,6 @@
 import * as CatchService from "../services/catch.service.js"
 import { handleControllerError } from '../utils/errorHandler.js';
+import { CatchEnum } from "../models/catch.model.js";
 
 export const getAllCatches = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -44,8 +45,12 @@ export const createCatch = async (req, res) => {
   const { species, weight, lake, dateCaught, rig, bait, distance, location, text, photo } = req.body;
   const userId = req.user._id;
 
-  if (!text || !photo || !species || !weight || !dateCaught) {
+  if (!text || !photo || !species || !weight || !dateCaught || !lake) {
     return res.status(400).json({ message: "Some fields are missing" });
+  }
+  console.log(dateCaught, dateCaught instanceof Date, !isNaN(new Date(dateCaught).getTime()))
+  if (!text.trim() || CatchEnum[(species.trim())] !== undefined || !species.trim() || weight <= 0 || isNaN(new Date(dateCaught).getTime()) || !lake.trim() || !photo.trim()) {
+    return res.status(400).json({ message: "Invalid data" });
   }
   try {
     const newCatch = await CatchService.createCatch({ user: userId, species, weight, lake, dateCaught, rig, bait, distance, location, text, photo });
@@ -60,10 +65,11 @@ export const updateCatch = async (req, res) => {
   const { catchId } = req.params;
   const userId = req.user._id;
   const updates = req.body;
+  console.log("User Id from req", userId)
 
   if (Object.keys(updates).length === 0) return res.status(400).json({ message: "No updates provided" });
 
-  if (updates._id || updates.user || updates.comments || updates.likes) return res.status(400).json({ message: "Not Authorized" });
+  if (updates._id || updates.user || updates.comments || updates.likes || updates.__v || updates.createdAt || updates.updatedAt) return res.status(400).json({ message: "Not Authorized" });
   try {
     const updatedCatch = await CatchService.updateCatch(catchId, userId, updates);
     res.status(200).json(updatedCatch);
@@ -89,8 +95,10 @@ export const createComment = async (req, res) => {
   const { catchId } = req.params;
   const userId = req.user._id;
   const { text } = req.body;
+  const maxCommentLength = 200;
 
-  if (text === "") return res.status(400).json({ message: "Comment text is required" });
+  if (text === "" || !text) return res.status(400).json({ message: "Comment text is required." });
+  if (text.length > maxCommentLength) return res.status(400).json({ message: `Comment cannot be longer than ${maxCommentLength} characters.` });
 
   try {
     const catchPost = await CatchService.createComment(catchId, userId, text);
@@ -117,8 +125,11 @@ export const updateComment = async (req, res) => {
   const { catchId, commentId } = req.params;
   const userId = req.user._id;
   const { text } = req.body;
+  const maxCommentLength = 200;
 
-  if (!text) return res.status(400).json({ message: "Comment text is required" });
+
+  if (text === "" || !text) return res.status(400).json({ message: "Comment text is required." });
+  if (text.length > maxCommentLength) return res.status(400).json({ message: `Comment cannot be longer than ${maxCommentLength} characters.` });
 
   try {
     const updatedCatch = await CatchService.updateComment(catchId, userId, commentId, text);
