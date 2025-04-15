@@ -69,7 +69,7 @@ class CatchRepository {
      * Get a catch by ID
      * @param {string} catchId - The ID of the catch
      * @returns {Promise<object>} - The catch object as a plain object. Returns null if no catch is found.
-     * Each cathc will contain the user's fullname, username and profile picture, and comments.
+     * Each catch will contain the user's fullname, username and profile picture, and comments.
      * Each comment contains the user's fullname, username and profile picture.
      */
     async getCatchById(catchId) {
@@ -83,7 +83,7 @@ class CatchRepository {
      * Get a catch by ID
      * @param {string} catchId - The ID of the catch
      * @returns {Promise<Catch>} - The catch object. Returns null if no catch is found.
-     * Each cathc will contain the user's fullname, username and profile picture, and comments.
+     * Each catch will contain the user's fullname, username and profile picture, and comments.
      * Each comment contains the user's fullname, username and profile picture.
      */
     async getCatchByIdMongooseDoc(catchId) {
@@ -104,6 +104,21 @@ class CatchRepository {
         return catchObject;
     }
 
+    /**
+     * Create a new catch and return it populated
+     * @param {object} catchData - The data for the new catch.
+     * @returns {Promise<object>} - The newly created catch poulatedobject as a plain object.
+     * Each catch will contain the user's fullname, username and profile pictur
+     */
+    async createCatchPopulated(catchData) {
+        const newCatch = new Catch(catchData);
+        await newCatch.save();
+        return await Catch.findById(newCatch._id)
+            .populate(this.userPopulate)
+            .populate(this.commentsPopulate)
+            .lean()
+    }
+
     /** 
      * Update a catch by ID.
      * @param {string} catchId - The ID of the catch to update.
@@ -111,7 +126,11 @@ class CatchRepository {
      * @returns {Promise<object>} - The updated catch object as a plain object.
      */
     async updateCatchById(catchId, updatePayload) {
-        return Catch.findByIdAndUpdate(catchId, { $set: updatePayload }, { new: true, runValidators: true }).lean();
+        return Catch.findByIdAndUpdate(catchId, { $set: updatePayload },
+            { new: true, runValidators: true })
+            .populate(this.userPopulate)
+            .populate(this.commentsPopulate)
+            .lean();
     }
 
     /**

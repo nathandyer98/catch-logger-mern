@@ -7,12 +7,11 @@ import { getMessages, sendMessage, editMessage, deleteMessage, readMessages } fr
 
 
 const router = express.Router();
+
 //Conversation Routes
 router.get('/', authenticatedRoute, getConversations);
 router.get('/:id', authenticatedRoute, getConversation);
-
 router.post('/', authenticatedRoute, createConversation);
-
 router.delete('/:id', authenticatedRoute, deleteConversation);
 
 

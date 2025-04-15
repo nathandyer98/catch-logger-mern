@@ -27,12 +27,14 @@ export const getConversation = async (req, res) => {
 export const createConversation = async (req, res) => {
     const { participants } = req.body
     const userId = req.user._id
+    if (!participants || participants.length === 0) return res.status(400).json({ message: "No participants provided." })
 
-    if (!participants) return res.status(400).json({ message: "Participants are required" })
-    if (participants.length === 1 && participants[0] === userId.toString()) return res.status(400).json({ message: "You cannot create a conversation with yourself" })
+    const participantsIds = participants.map(participant => typeof participant === "string" ? participant : participant.toString())
+
+    if (participants.length === 1 && participantsIds[0] === userId.toString()) return res.status(400).json({ message: "You cannot create a conversation with yourself." })
 
     try {
-        const conversation = await ConversationService.createConversation(userId, participants);
+        const conversation = await ConversationService.createConversation(userId, participantsIds);
         res.status(201).json(conversation);
     } catch (error) {
         console.log("---Create Conversation Controller Error---", error);

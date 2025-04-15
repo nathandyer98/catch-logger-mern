@@ -49,7 +49,9 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
         set({ isCreatingConversation: true });
         let conversationToSelect: Conversation | null = null;
         try {
-            const res = await axiosInstance.post("/conversations", { participants });
+            const participantsIds = participants.map(participant => participant._id);
+
+            const res = await axiosInstance.post("/conversations", { participantsIds });
 
             const conversationExistsLocally = get().conversations.some((c) => c._id === res.data._id);
 

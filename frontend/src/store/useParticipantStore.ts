@@ -36,7 +36,7 @@ export const useParticipantStore = create<ParticipantState>((set) => ({
         set({ searchedUsers: users });
     },
 
-    setSelectedUsers: (user: Participant[]) => {
-        set({ selectedUsers: user });
+    setSelectedUsers: (users: Participant[]) => {
+        set({ selectedUsers: users });
     },
 }));

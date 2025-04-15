@@ -3,7 +3,7 @@ import Conversation from "../models/conversation.model.js";
 class ConversationRepository {
 
     // Populate options
-    participantPopulate = { path: "participants", select: "username fullname profilePic" };
+    participantPopulate = { path: "participants", select: "username fullName profilePic" };
     lastMessagePopulate = {
         path: "lastMessage", select: "_id from text createdAt",
         populate: { path: "from", select: "username fullname profilePic" }
@@ -115,7 +115,12 @@ class ConversationRepository {
      * @returns {Promise<object>} - A plain conversation object, but with the user added to accessedBy
      */
     async addParticipantToConversation(conversationId, userId) {
-        return Conversation.findByIdAndUpdate(conversationId, { $addToSet: { accessedBy: userId } }, { new: true }).lean();
+        return Conversation.findByIdAndUpdate(conversationId,
+            { $addToSet: { accessedBy: userId } },
+            { new: true })
+            .populate(this.participantPopulate)
+            .populate(this.lastMessagePopulate)
+            .lean();
     }
 
     /**
@@ -169,7 +174,7 @@ class ConversationRepository {
      * @returns {Promise<boolean>} - True if the user is apart of the conversation, false otherwise
      */
     async isUserPartOfConversation(conversationId, userId) {
-        const conversation = await Conversation.findOne({ _id: conversationId, participants: userId });
+        const conversation = await Conversation.findOne({ _id: conversationId, accessedBy: userId });
         return conversation !== null;
     }
 
