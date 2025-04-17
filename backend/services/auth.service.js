@@ -40,37 +40,21 @@ export const signUpUser = async (userData) => {
         // verficationTokenExpiry
     };
 
-    try {
-        const user = await UserRepository.createUser(newUserInput);
-        return user;
-    } catch (error) {
-        console.error("Error creating user in repository:", error);
-        throw new ServiceError(error.message);
-    };
+    const user = await UserRepository.createUser(newUserInput);
+    return user;
 }
 
 export const loginUser = async (email, password) => {
-    try {
-        const user = await UserRepository.findByEmailWithPassword(email)
-        if (!user) {
-            throw new AuthenticationError("Incorrect Email or Password")
-        }
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);
-        if (!isPasswordCorrect) {
-            throw new AuthenticationError("Incorrect Email or Password")
-        }
-        delete user.password;
-        return user;
-    } catch (error) {
-        if (error instanceof AuthenticationError) {
-            throw error; // Re-throw the error if it's an authentication error
-        } else if (error instanceof NotFoundError) {
-            throw new NotFoundError("User not found");
-        }
-        // Handle other errors (e.g., database errors)
-        console.error("Error logging in user:", error);
-        throw new ServiceError("Failed to login due to a service issue.");
+    const user = await UserRepository.findByEmailWithPassword(email)
+    if (!user) {
+        throw new AuthenticationError("Incorrect Email or Password")
     }
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+        throw new AuthenticationError("Incorrect Email or Password")
+    }
+    delete user.password;
+    return user;
 }
 
 export const updateUserProfile = async (userId, updatePayload) => {
@@ -91,11 +75,11 @@ export const updateUserProfile = async (userId, updatePayload) => {
         try {
             if (user.profilePic) {
                 try {
-                    console.log(user.profilePic.split('/').pop().split('.')[0])
+                    console.log("Trying to delete profile pic:", user.profilePic);
                     const deletedResponse = await cloudinary.uploader.destroy(`user_profiles/${user.profilePic.split('/').pop().split('.')[0]}`);
                     console.log("Cloudinary delete successful:", deletedResponse);
-                } catch (error) {
-                    console.warn("Cloudinary delete failed:", deletedResponse);
+                } catch (deleteError) {
+                    console.warn("Cloudinary delete failed (non-critical):", deleteError);
                 }
             }
             const uploadedResponse = await cloudinary.uploader.upload(profilePic, { folder: "user_profiles" });
@@ -108,15 +92,9 @@ export const updateUserProfile = async (userId, updatePayload) => {
     if (Object.keys(fieldsToUpdate).length === 0) {
         throw new UserInputError("No valid data provided for update");
     }
-    try {
-        console.log("Fields to update:", fieldsToUpdate);
-        const updatedUser = await UserRepository.updateUserById(userId, fieldsToUpdate);
-        if (!updatedUser) {
-            throw new NotFoundError("User not found during update operation.");
-        }
-        return updatedUser
-    } catch (error) {
-        console.error("Error updating user in repository:", error);
-        throw new ServiceError("Failed to update user profile.");
+    const updatedUser = await UserRepository.updateUserById(userId, fieldsToUpdate);
+    if (!updatedUser) {
+        throw new NotFoundError("User not found during update operation.");
     }
+    return updatedUser
 }

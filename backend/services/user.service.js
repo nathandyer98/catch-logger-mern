@@ -11,13 +11,8 @@ export const getUserProfile = async (username) => {
 }
 
 export const searchUsers = async (currentUserId, usernameQuery) => {
-    try {
-        const users = await UserRepository.findUsersByUsernameQuery(currentUserId, usernameQuery)
-        return users
-    } catch (error) {
-        console.error("Error searching users in repository: ", error);
-        throw new ServiceError("Failed to search users due to a service issue.");
-    }
+    const users = await UserRepository.findUsersByUsernameQuery(currentUserId, usernameQuery)
+    return users
 }
 
 export const followUnfollowUser = async (currentUserId, targetUserId) => {
@@ -30,43 +25,32 @@ export const followUnfollowUser = async (currentUserId, targetUserId) => {
     let user;
     let message;
 
-    try {
-        if (currentUser.following.includes(targetUserId)) {
-            user = await UserRepository.unfollowUserById(currentUserId, targetUserId);
-            message = "You are no longer following this user."
-        } else {
-            user = await UserRepository.followUserById(currentUserId, targetUserId);
-            message = "You are now following this user."
+    if (currentUser.following.includes(targetUserId)) {
+        user = await UserRepository.unfollowUserById(currentUserId, targetUserId);
+        message = "You are no longer following this user."
+    } else {
+        user = await UserRepository.followUserById(currentUserId, targetUserId);
+        message = "You are now following this user."
 
-            await NotificationService.createNotification({
-                from: currentUserId,
-                to: targetUserId,
-                type: "follow",
-            });
-        }
-        return { user, message }
-    } catch (error) {
-        console.error("Error following/unfollowing in repository: ", error);
-        throw new ServiceError("Failed to follow/unfollow user due to service issue.");
+        await NotificationService.createNotification({
+            from: currentUserId,
+            to: targetUserId,
+            type: "follow",
+        });
     }
+    return { user, message }
 }
 
 export const getSuggestedUsers = async (userId) => {
     const amount = 4
-    try {
-        const follwingList = await UserRepository.getFollowingList(userId);
-        const followedUsers = follwingList.following.map(user => user._id.toString());
-        const usersSample = await UserRepository.findOtherUsersSample(userId);
-
-        if (!followedUsers) {
-            throw new NotFoundError("Current user not found when fetching following list.");
-        }
-
-        const filteredUsers = usersSample.filter(user => !followedUsers.includes(user._id.toString()));
-        return filteredUsers.slice(0, amount)
-    } catch (error) {
-        console.error("Error fetching suggested users in repository:", error);
-        throw new ServiceError("Failed to fetch suggested users.");
+    const followingList = await UserRepository.getFollowingList(userId);
+    if (!followingList) {
+        throw new NotFoundError("Current user not found when fetching following list.");
     }
 
+    const followedUsers = followingList.following.map(user => user._id.toString());
+    const usersSample = await UserRepository.findOtherUsersSample(userId);
+
+    const filteredUsers = usersSample.filter(user => !followedUsers.includes(user._id.toString()));
+    return filteredUsers.slice(0, amount)
 }

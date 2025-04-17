@@ -9,25 +9,16 @@ import {
 } from '../errors/applicationErrors.js';
 
 export const getAllCatches = async ({ page, limit }) => {
-    try {
-        const catches = await CatchRepository.getCatches(page, limit);
-        return catches
-    } catch (error) {
-        console.log("Error fetching all cathches in repository:", error);
-        throw new ServiceError("Failed to fetch all catches due to a service issue.");
-    }
+    const catches = await CatchRepository.getCatches(page, limit);
+    return catches
 }
 
 export const getCatchesByUser = async (username, { page, limit }) => {
     const user = await UserRepository.findByUsername(username);
     if (!user) throw new NotFoundError("User not found.");
-    try {
-        const catches = await CatchRepository.getCatchesById(user._id, page, limit);
-        return catches
-    } catch (error) {
-        console.log("Error fetching all cathches in repository:", error);
-        throw new ServiceError("Failed to fetch user's catches due to a service issue.");
-    }
+
+    const catches = await CatchRepository.getCatchesById(user._id, page, limit);
+    return catches
 }
 
 export const getCatchesFeed = async (userId, { page, limit }) => {
@@ -35,13 +26,8 @@ export const getCatchesFeed = async (userId, { page, limit }) => {
     if (!user) throw new NotFoundError("User not found.");
 
     const userIds = [user._id, ...user.following];
-    try {
-        const catches = await CatchRepository.getCatchesByUserIds(userIds, page, limit);
-        return catches
-    } catch (error) {
-        console.log("Error fetching all cathches in repository:", error);
-        throw new ServiceError("Failed to fetch catches feed due to a service issue.");
-    }
+    const catches = await CatchRepository.getCatchesByUserIds(userIds, page, limit);
+    return catches
 }
 
 export const createCatch = async (catchData) => {
@@ -55,18 +41,13 @@ export const createCatch = async (catchData) => {
             photoUrl = uploadedResponse.secure_url;
         } catch (uploadError) {
             console.error("Cloudinary upload failed:", uploadError);
-            throw new ServiceError("Failed to upload message photo."); // Or handle differently
+            throw new ServiceError("Failed to upload message photo.");
         }
     }
+
     catchData = { ...catchData, photo: photoUrl };
-    try {
-        const createCatch = await CatchRepository.createCatch(catchData);
-        const newCatch = await CatchRepository.getCatchById(createCatch._id);
-        return newCatch
-    } catch (error) {
-        console.log("Error creating catch in repository:", error);
-        throw new ServiceError("Failed to create catch due to a service issue.");
-    }
+    const newCatch = await CatchRepository.createCatchPopulated(catchData);
+    return newCatch
 }
 
 export const updateCatch = async (catchId, userId, updateData) => {
@@ -80,33 +61,24 @@ export const updateCatch = async (catchId, userId, updateData) => {
         try {
             if (catchToUpdate.photo) {
                 try {
+                    console.log("Trying to delete catch photo:", catchToUpdate.photo);
                     await cloudinary.uploader.destroy(`catch_photos/${catchToUpdate.photo.split('/').pop().split('.')[0]}`);
-                } catch (error) {
-                    console.warn("Cloudinary delete failed:", deletedResponse);
+                    console.log("Cloudinary delete successful.");
+                } catch (deleteError) {
+                    console.warn("Cloudinary delete failed (non-critical):", deleteError);
                 }
             }
             const uploadedResponse = await cloudinary.uploader.upload(updateData.photo, { folder: "catch_photos" });
             photoUrl = uploadedResponse.secure_url;
             updatePayload = { ...updateData, photo: photoUrl };
-
         } catch (uploadError) {
             console.error("Cloudinary upload failed:", uploadError);
-            throw new ServiceError("Failed to upload message photo."); // Or handle differently
+            throw new ServiceError("Failed to upload message photo.");
         }
     }
-    try {
-        const updatedCatch = await CatchRepository.updateCatchById(catchId, updatePayload);
-        const newCatch = await CatchRepository.getCatchById(updatedCatch._id);
-        return newCatch
-    } catch (error) {
-        if (error instanceof NotFoundError) {
-            throw new NotFoundError("Catch not found.");
-        } else if (error instanceof AuthenticationError) {
-            throw new AuthenticationError("Unauthorized - User is not authorized to update this catch.");
-        }
-        console.log("Error updating catch in repository:", error);
-        throw new ServiceError("Failed to update catch due to a service issue.");
-    }
+    const updatedCatch = await CatchRepository.updateCatchById(catchId, updatePayload);
+    const newCatch = await CatchRepository.getCatchById(updatedCatch._id);
+    return updatedCatch
 }
 
 export const deleteCatch = async (catchId, userId) => {
@@ -116,24 +88,15 @@ export const deleteCatch = async (catchId, userId) => {
 
     if (catchToDelete.photo) {
         try {
+            console.log("Trying to delete catch photo:", catchToDelete.photo);
             await cloudinary.uploader.destroy(`catch_photos/${catchToDelete.photo.split('/').pop().split('.')[0]}`);
-        } catch (error) {
-            console.log("Error deleting catch photo in repository:", error);
-            throw new ServiceError("Failed to delete catch photo due to a service issue.");
+            console.log("Cloudinary delete successful.");
+        } catch (deleteError) {
+            console.warn("Cloudinary delete failed (non-critical):", deleteError);
         }
     }
-    try {
-        await CatchRepository.deleteCatchById(catchId);
-        return "Catch deleted successfully.";
-    } catch (error) {
-        if (error instanceof NotFoundError) {
-            throw new NotFoundError("Catch not found.");
-        } else if (error instanceof AuthenticationError) {
-            throw new AuthenticationError("Unauthorized - User is not authorized to delete this catch.");
-        }
-        console.log("Error deleting catch in repository:", error);
-        throw new ServiceError("Failed to delete catch due to a service issue.");
-    }
+    await CatchRepository.deleteCatchById(catchId);
+    return "Catch deleted successfully.";
 }
 
 export const likeUnlikeCatch = async (catchId, userId) => {
@@ -146,27 +109,22 @@ export const likeUnlikeCatch = async (catchId, userId) => {
     let catchLikes;
     let message;
 
-    try {
-        if (catchToLikeUnlike.likes.includes(userId)) {
-            catchLikes = await CatchRepository.unlikeCatchById(catchId, userId);
-            await UserRepository.unlikeCatchById(catchId, userId);
-            message = "Unliked Catch.";
-        } else {
-            catchLikes = await CatchRepository.likeCatchById(catchId, userId);
-            await UserRepository.likeCatchById(catchId, userId);
-            message = "Liked Catch.";
+    if (catchToLikeUnlike.likes.includes(userId)) {
+        catchLikes = await CatchRepository.unlikeCatchById(catchId, userId);
+        await UserRepository.unlikeCatchById(catchId, userId);
+        message = "Unliked Catch.";
+    } else {
+        catchLikes = await CatchRepository.likeCatchById(catchId, userId);
+        await UserRepository.likeCatchById(catchId, userId);
+        message = "Liked Catch.";
 
-            await NotificationService.createNotification({
-                from: userId,
-                to: catchToLikeUnlike.user._id,
-                type: "like",
-            });
-        }
-        return { catchLikes, message }
-    } catch (error) {
-        console.log("Error liking/unliking catch in repository:", error);
-        throw new ServiceError("Failed to like/unlike catch due to a service issue.");
+        await NotificationService.createNotification({
+            from: userId,
+            to: catchToLikeUnlike.user._id,
+            type: "like",
+        });
     }
+    return { catchLikes, message }
 }
 
 export const createComment = async (catchId, userId, comment) => {
@@ -176,20 +134,15 @@ export const createComment = async (catchId, userId, comment) => {
     const user = await UserRepository.findById(userId);
     if (!user) throw new NotFoundError("User not found.");
 
-    try {
-        const updatedComments = await CatchRepository.commentOnCatchById(catchId, userId, comment);
+    const updatedComments = await CatchRepository.commentOnCatchById(catchId, userId, comment);
 
-        await NotificationService.createNotification({
-            from: userId,
-            to: catchToComment.user._id,
-            type: "comment",
-        });
+    await NotificationService.createNotification({
+        from: userId,
+        to: catchToComment.user._id,
+        type: "comment",
+    });
 
-        return updatedComments
-    } catch (error) {
-        console.log("Error creating comment in repository:", error);
-        throw new ServiceError("Failed to create comment due to a service issue.");
-    }
+    return updatedComments
 }
 
 export const deleteComment = async (catchId, userId, commentId) => {
@@ -204,13 +157,8 @@ export const deleteComment = async (catchId, userId, commentId) => {
 
     if (CommentExists && CommentExists.user._id.toString() !== userId.toString()) throw new AuthenticationError("Unauthorized - User is not authorized to delete this comment.");
 
-    try {
-        await CatchRepository.deleteCommentById(catchId, commentId);
-        return "Comment deleted successfully."
-    } catch (error) {
-        console.log("Error deleting comment in repository:", error);
-        throw new ServiceError("Failed to delete comment due to a service issue.");
-    }
+    await CatchRepository.deleteCommentById(catchId, commentId);
+    return "Comment deleted successfully."
 
 }
 
@@ -226,12 +174,7 @@ export const updateComment = async (catchId, userId, commentId, comment) => {
 
     if (CommentExists && CommentExists.user._id.toString() !== userId.toString()) throw new AuthenticationError("Unauthorized - User is not authorized to update this comment.");
 
-    try {
-        const updatedComment = await CatchRepository.updateCommentById(catchId, commentId, comment);
-        return updatedComment
-    } catch (error) {
-        console.log("Error updating comment in repository:", error);
-        throw new ServiceError("Failed to update comment due to a service issue.");
-    }
+    const updatedComment = await CatchRepository.updateCommentById(catchId, commentId, comment);
+    return updatedComment
 }
 
