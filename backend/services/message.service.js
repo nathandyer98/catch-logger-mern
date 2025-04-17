@@ -18,7 +18,7 @@ export const getMessagesForAConversation = async (conversationId, userId) => {
     const unreadMessageCount = await MessageRepository.getUnreadMessagesCount(conversationId, userId);
     if (unreadMessageCount > 0) {
         try {
-            console.log("Marking messages as read...");
+            console.log("Marking messages as read... For user:", userId.toString(), "in conversation:", conversationId);
             await MessageRepository.markMessagesAsRead(messages.map(message => message._id), userId);
             //Updating messages in memory
             messages = messages.map(message => {
