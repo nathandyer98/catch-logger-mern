@@ -181,7 +181,7 @@ describe('POST /api/auth/signup', () => {
 
 
         // Assert: Validate the response body
-        expect(response.statusCode).toBe(201);
+        expect(response.statusCode).toBe(200);
         expect(response.body).toBeDefined();
         expect(response.body).toHaveProperty('_id');
         expect(response.body).toHaveProperty('fullName', TEST_FULLNAME);

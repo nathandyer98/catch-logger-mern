@@ -17,7 +17,7 @@ export const sendMessage = async (req, res) => {
     const { text, image } = req.body;
     const { id: conversationId } = req.params;
     const userId = req.user._id;
-    if (!text && !image) return res.status(400).json({ message: 'Please enter text or image' });
+    if (!text && !image) return res.status(400).json({ message: 'Please enter text or image.' });
     try {
         const newMessage = await MessageService.sendMessage(conversationId, userId, { text, image });
         res.status(200).json(newMessage);
@@ -47,7 +47,7 @@ export const deleteMessage = async (req, res) => {
     const userId = req.user._id;
     try {
         await MessageService.deleteMessage(conversationId, messageId, userId);
-        res.status(200).json({ message: 'Message deleted successfully' });
+        res.status(200).json({ message: 'Message deleted.' });
     } catch (error) {
         console.log("---Delete Messages Controller Error---", error);
         handleControllerError(error, res)

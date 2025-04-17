@@ -74,12 +74,13 @@ class MessageRepository {
 
     /**
      * Edit a message by ID
+     * @param {string} conversationId - The ID of the conversation
      * @param {string} messageId - The ID of the message to edit
      * @param {object} updateData - The data to update the message with
      * @returns {Promise<object>} - The updated message object as a plain object
      */
-    async editMessageById(messageId, updateData) {
-        return Message.findByIdAndUpdate(messageId, updateData, { new: true, runValidators: true }).lean();
+    async editMessageById(conversationId, messageId, updateData) {
+        return Message.findByIdAndUpdate({ _id: messageId, conversationId }, updateData, { new: true, runValidators: true }).lean();
     }
 
     /**

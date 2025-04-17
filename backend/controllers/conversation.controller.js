@@ -35,7 +35,7 @@ export const createConversation = async (req, res) => {
 
     try {
         const conversation = await ConversationService.createConversation(userId, participantsIds);
-        res.status(201).json(conversation);
+        res.status(200).json(conversation);
     } catch (error) {
         console.log("---Create Conversation Controller Error---", error);
         handleControllerError(error, res)

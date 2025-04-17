@@ -15,7 +15,7 @@ export const signup = async (req, res) => {
         const newUser = await AuthService.signUpUser({ fullName, email, password, username })
         generateToken(newUser._id, res);
 
-        res.status(201).json(newUser);
+        res.status(200).json(newUser);
     } catch (error) {
         console.error("---Sign Up Controller Error---");
         handleControllerError(error, res)

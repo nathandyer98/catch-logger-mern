@@ -158,7 +158,7 @@ describe('GET /api/conversations', () => {
 describe('POST /api/conversations/', () => {
     it('should create a direct conversation', async () => {
         const response = await agentUser1.post('/api/conversations/').send({ participants: [user2Participant._id] });
-        expect(response.status).toBe(201);
+        expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('_id', expect.any(String));
         expect(response.body).toHaveProperty('type', 'Direct');
         expect(response.body).toHaveProperty('participants', expect.arrayContaining([user1Participant, user2Participant]));
@@ -181,7 +181,7 @@ describe('POST /api/conversations/', () => {
         //User1 creating the direct conversation with user2
         const response = await agentUser1.post('/api/conversations/').send({ participants: [user2Participant._id] });
         const initalConversationId = response.body._id;
-        expect(response.status).toBe(201);
+        expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('_id', expect.any(String));
         expect(response.body).toHaveProperty('type', 'Direct');
         expect(response.body).toHaveProperty('participants', expect.arrayContaining([user1Participant, user2Participant]));
@@ -202,7 +202,7 @@ describe('POST /api/conversations/', () => {
 
         //User2 creating a conversation with user1, should add user2 to existing conversation
         const response2 = await agentUser2.post('/api/conversations/').send({ participants: [user1Participant._id] });
-        expect(response2.status).toBe(201);
+        expect(response2.status).toBe(200);
         expect(response2.body).toHaveProperty('_id', initalConversationId);
         expect(response2.body).toHaveProperty('type', 'Direct');
         expect(response2.body).toHaveProperty('participants', expect.arrayContaining([user1Participant, user2Participant]));
@@ -225,7 +225,7 @@ describe('POST /api/conversations/', () => {
     it('should create a group conversation', async () => {
         //User1 creating a conversation with user2 and user3
         const response = await agentUser1.post('/api/conversations/').send({ participants: [user2Participant._id, user3Participant._id] });
-        expect(response.status).toBe(201);
+        expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('_id', expect.any(String));
         expect(response.body).toHaveProperty('type', 'Group');
         expect(response.body).toHaveProperty('participants', expect.arrayContaining([user1Participant, user2Participant, user3Participant]));
@@ -306,7 +306,7 @@ describe('DELETE /api/conversations/:conversationId', () => {
     it('should delete the conversation for group conversations when they are the last user', async () => {
         //creating the conversation
         const response = await agentUser1.post('/api/conversations/').send({ participants: [user2Participant._id, user3Participant._id] });
-        expect(response.status).toBe(201);
+        expect(response.status).toBe(200);
         const conversationId = response.body._id;
 
         //user 1 leaving the conversation
@@ -367,6 +367,6 @@ describe('DELETE /api/conversations/:conversationId', () => {
 
         const response2 = await agentUser2.delete(`/api/conversations/${conversationId}`);
         expect(response2.status).toBe(401);
-        expect(response2.body).toHaveProperty('message', 'Unauthorized - User is not authorized to delete this conversation.');
+        expect(response2.body).toHaveProperty('message', 'Unauthorized - User is not authorized to access this conversation.');
     });
 });
