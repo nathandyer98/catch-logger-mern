@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import bcrypt from 'bcryptjs';
-import Conversation from '../models/conversation.model.js';
-import Message from '../models/message.model.js';
-import User from '../models/user.model.js';
+import Conversation from '../src/models/conversation.model.js';
+import Message from '../src/models/message.model.js';
+import User from '../src/models/user.model.js';
 import { user1Fixture, user2Fixture, user3Fixture } from './fixtures/users.fixture.js';
 import { createLoggedInAgent, createUnloggedInAgent } from './utils/apiTestAgent.js';
-jest.mock('../lib/cloudinary.js');
-import cloudinary from '../lib/cloudinary.js';
+jest.mock('../src/lib/cloudinary.js');
+import cloudinary from '../src/lib/cloudinary.js';
 
 let mongoServer;
 let agentUser1, agentUser2, agentUser3, unauthenticatedAgent;

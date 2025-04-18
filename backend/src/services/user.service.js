@@ -1,6 +1,6 @@
 import UserRepository from "../repository/user.repository.js";
 import * as NotificationService from "./notification.service.js";
-import { NotFoundError, ServiceError } from '../errors/applicationErrors.js';
+import { NotFoundError } from '../errors/applicationErrors.js';
 
 export const getUserProfile = async (username) => {
     const user = await UserRepository.findByUsername(username);

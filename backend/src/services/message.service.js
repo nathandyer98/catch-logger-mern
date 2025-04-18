@@ -1,6 +1,6 @@
 import MessageRepository from "../repository/message.repository.js";
 import * as ConversationService from "./conversation.service.js";
-import { SocketService } from "../services/socket.service.js";
+import { SocketService } from "./socket.service.js";
 import cloudinary from "../lib/cloudinary.js";
 import {
     ServiceError,
@@ -8,7 +8,7 @@ import {
     AuthenticationError,
     NotFoundError
 } from '../errors/applicationErrors.js';
-import eventBus from "../src/eventBus.js";
+import eventBus from '../utils/eventBus.js';
 
 export const getMessagesForAConversation = async (conversationId, userId) => {
     await ConversationService.authoriseAndValidateConversation(conversationId, userId);

@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import bcrypt from 'bcryptjs';
-import User from '../models/user.model.js';
+import User from '../src/models/user.model.js';
 import { user1Fixture, user2Fixture, user3Fixture, user4Fixture } from './fixtures/users.fixture.js';
 import { createLoggedInAgent } from './utils/apiTestAgent.js';
-jest.mock('../lib/cloudinary.js');
+jest.mock('../src/lib/cloudinary.js');
+import cloudinary from '../src/lib/cloudinary.js';
 
 
 let mongoServer;
@@ -19,10 +20,24 @@ const hashPassword = async (password = 'password123') => {
 
 
 beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log(`MongoDB Memory Server started at ${mongoUri}`);
+    try {
+
+        console.log('Setting up MongoDB Memory Server...');
+        mongoServer = await MongoMemoryServer.create();
+        console.log('Memory Server created.');
+        const mongoUri = mongoServer.getUri();
+        console.log('Memory Server URI:', mongoUri);
+        await mongoose.connect(mongoUri);
+        console.log(`MongoDB Memory Server started at ${mongoUri}`);
+        console.log('>>> Mongoose connection state (in beforeAll):', mongoose.connection.readyState);
+        // Expected output: >>> Mongoose connection state (in beforeAll): 1
+        if (mongoose.connection.readyState !== 1) {
+            throw new Error('Mongoose connection failed to reach readyState 1');
+        }
+    } catch (error) {
+        console.error('Error during test setup:', error);
+        process.exit(1); // Exit if setup fails
+    }
 });
 
 
@@ -33,8 +48,27 @@ afterAll(async () => {
 });
 
 beforeEach(async () => {
-    await User.deleteMany({});
-
+    console.log('--- Entering beforeEach ---');
+    // --- ADD DELAY ---
+    console.log('Adding short delay before DB ops...');
+    await new Promise(resolve => setTimeout(resolve, 200)); // Wait 200ms
+    console.log('Delay finished.');
+    // --- END DELAY ---
+    try {
+        // ... rest of your try block ...
+        console.log('>>> Checking User model...'); // Keep existing logs
+        // ...
+        console.log('Attempting User.countDocuments...');
+        // const count = await User.countDocuments(); // Try counting instead of deleting
+        // console.log('User.countDocuments result:', count);
+        // console.log('Attempting User.deleteMany...');
+        // await User.deleteMany({});
+        // console.log('User.deleteMany completed.');
+        // ...
+    } catch (error) {
+        console.error('!!! ERROR occurred within beforeEach !!!:', error);
+        process.exit(1);
+    }
     const hashedPassword = await hashPassword();
     const user1Doc = new User({ ...user1Fixture, password: hashedPassword });
     const user2Doc = new User({ ...user2Fixture, password: hashedPassword });
@@ -58,7 +92,8 @@ beforeEach(async () => {
         console.error('Error setting up agent users in beforeEach:', error);
         throw error;
     }
-});
+
+}); // Increase timeout just in case
 
 //Test Suit for Get User Profile
 describe('GET /api/users/:username/profile', () => {

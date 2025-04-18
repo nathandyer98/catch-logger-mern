@@ -1,5 +1,5 @@
-import * as ConversationService from "../../services/conversation.service.js";
-import * as MessageService from "../../services/message.service.js";
+import * as ConversationService from "../services/conversation.service.js";
+import * as MessageService from "../services/message.service.js";
 
 /**
  * Initialises Socket.IO event handlers and listeners

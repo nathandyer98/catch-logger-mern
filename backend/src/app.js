@@ -3,11 +3,11 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 
-import authRoute from "../routes/auth.route.js"
-import catchRoute from "../routes/catch.route.js"
-import userRoute from "../routes/user.route.js"
-import notificationRoute from "../routes/notification.route.js"
-import converstaionRoute from "../routes/conversation.route.js"
+import authRoute from "./routes/auth.route.js"
+import catchRoute from "./routes/catch.route.js"
+import userRoute from "./routes/user.route.js"
+import notificationRoute from "./routes/notification.route.js"
+import converstaionRoute from "./routes/conversation.route.js"
 
 dotenv.config();
 

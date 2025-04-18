@@ -2,7 +2,7 @@ import ConversationRepository from "../repository/conversation.repository.js";
 import UserRepository from "../repository/user.repository.js";
 import MessageRepository from "../repository/message.repository.js";
 import { AuthenticationError, NotFoundError, ServiceError } from '../errors/applicationErrors.js';
-import eventBus from "../src/eventBus.js";
+import eventBus from '../utils/eventBus.js';
 
 export const getAllConversationsForUser = async (userId) => {
     const conversations = await ConversationRepository.getConversations(userId);

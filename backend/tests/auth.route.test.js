@@ -3,9 +3,9 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import bcrypt from 'bcryptjs';
 import { app } from '../src/server.js';
-import User from '../models/user.model.js'; // Adjust the path to your User model
-jest.mock('../lib/cloudinary.js');
-import cloudinary from '../lib/cloudinary.js';
+import User from '../src/models/user.model.js'; // Adjust the path to your User model
+jest.mock('../src/lib/cloudinary.js');
+import cloudinary from '../src/lib/cloudinary.js';
 
 
 let mongoServer;

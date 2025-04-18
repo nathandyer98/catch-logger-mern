@@ -1,15 +1,14 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import bcrypt from 'bcryptjs';
-import Notification from '../models/notification.model.js';
-import User from '../models/user.model.js';
+import Notification from '../src/models/notification.model.js';
+import User from '../src/models/user.model.js';
 import { user1Fixture, user2Fixture } from './fixtures/users.fixture.js';
-import Catch from '../models/catch.model.js';
+import Catch from '../src/models/catch.model.js';
 import { catch1Fixture, catch2Fixture, catch3Fixture, catch4Fixture } from './fixtures/catches.fixture.js';
 import { comment1Fixture } from './fixtures/catches.comments.fixture.js';
 import { createLoggedInAgent, createUnloggedInAgent } from './utils/apiTestAgent.js';
-jest.mock('../lib/cloudinary.js');
-import cloudinary from '../lib/cloudinary.js';
+jest.mock('../src/lib/cloudinary.js');
 
 let mongoServer;
 let agentUser1, agentUser2, unauthenticatedAgent;

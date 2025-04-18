@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import app from "./app.js";
 import { connectDB } from "../src/config/db.js";
 import { initializeSocketHandlers } from "./socket/socket.handler.js";
-import { SocketService } from '../services/socket.service.js';
+import { SocketService } from './services/socket.service.js';
 import { initializeRealtimeListeners } from "./listeners/realtime.listener.js";
 
 dotenv.config();

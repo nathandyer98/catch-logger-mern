@@ -1,8 +1,8 @@
-import eventBus from '../eventBus.js';
-import NotificationRepository from "../../repository/notification.repository.js";
-import MessageRepository from '../../repository/message.repository.js';
-import { SocketService } from "../../services/socket.service.js";
-import { NotFoundError } from '../../errors/applicationErrors.js';
+import eventBus from '../utils/eventBus.js';
+import NotificationRepository from "../repository/notification.repository.js";
+import MessageRepository from '../repository/message.repository.js';
+import { SocketService } from "../services/socket.service.js";
+import { NotFoundError } from '../errors/applicationErrors.js';
 
 export const initializeRealtimeListeners = () => {
 

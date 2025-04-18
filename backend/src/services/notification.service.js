@@ -1,6 +1,6 @@
 import NotificationRepository from "../repository/notification.repository.js";
 import { NotFoundError, ServiceError, AuthorizationError } from '../errors/applicationErrors.js';
-import eventBus from "../src/eventBus.js";
+import eventBus from '../utils/eventBus.js';
 
 export const getNotifications = async (userId) => {
     const notifications = await NotificationRepository.getNotifications(userId);
