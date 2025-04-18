@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../../src/index.js';
+import { app } from '../../src/server.js';
 
 /**
  * Creates a Supertest agent that is logged in via the API.
