@@ -32,11 +32,11 @@ Other technologies and libraries likely used (you can confirm and add/remove the
 
 * **Mongoose**: ODM for MongoDB.
 * **JSON Web Tokens (JWT)**: For authentication.
-* **Socket.IO**: For real-time features like messaging (if applicable).
+* **Socket.IO**: For real-time features like messaging.
 * **React Router**: For client-side routing.
 * **Axios/Fetch API**: For making HTTP requests from the client.
-* **Tailwind CSS / DaisyUI Components**: For styling (please specify).
-* **Cloudinary: For image uploads (if applicable).
+* **Tailwind CSS / DaisyUI Components**: For styling.
+* **Cloudinary**: For image uploads.
 
 ## 🚀 Getting Started
 
